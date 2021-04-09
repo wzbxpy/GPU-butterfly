@@ -8,8 +8,11 @@ class graph
     public:
     long long* beginPos;
     int* edgeList;
-    int uCount,vCount,edgeCount;
+    int uCount,vCount,breakVertex32,breakVertex10,vertexCount;
+    long long edgeCount;
     void loadgraph(string folderName);
+    void loadWangkaiGraph(string folderName);
+    ~graph();
 };
 
 #endif

@@ -1,0 +1,274 @@
+#include <iostream>
+#include <cub/cub.cuh>
+#include <cub/util_type.cuh>
+using namespace std;
+
+struct heap
+{
+    int element;
+    int* now;
+    int* end;
+};
+
+__device__ int* binarySearch_2(int* a, int* b, int x)
+{
+    while (a<b)
+    {
+        int* mid=a+((b-a)/2);
+        if (*mid<=x) a=mid+1; else b=mid;
+    }
+    return a;
+}
+//merge nb_list to 2-hop nb_list
+__device__ 
+void heapBased_Sorted2Hop(int vertex, long long *beginPos, int *edgeList, int num_frT , int num_srT, int *Sorted_NB, int part_mem_size,int part_num,double *store_time)
+{
+    double startTime,storeTime;
+    struct heap H[11];
+    H[0].element=-1;
+    int k=1;
+    int frT_no=threadIdx.x%(num_frT+num_srT);
+    long long num_NB=beginPos[vertex+1]-beginPos[vertex];
+    // first creat the heap 
+    for (int oneHopNeighborID=beginPos[vertex+1]-1-threadIdx.x*10; oneHopNeighborID>=beginPos[vertex]&&oneHopNeighborID>=beginPos[vertex+1]-11-threadIdx.x*10; oneHopNeighborID--)
+    {
+        int oneHopNeighbor=edgeList[oneHopNeighborID];
+        if (oneHopNeighbor<=vertex) break;
+        // get the first neighbor in each oneHopNeighbor's neighbor list 
+        H[k].end=edgeList+beginPos[oneHopNeighbor+1];
+        H[k].now=binarySearch_2(edgeList+beginPos[oneHopNeighbor], H[k].end, vertex);
+        if (H[k].now>=H[k].end)  continue;
+        H[k].element=*H[k].now;
+
+        // update the heap
+        int p=k;
+        while (H[p].element<H[p/2].element)
+        {
+            struct heap t;
+            t=H[p];
+            H[p]=H[p/2];
+            p/=2;
+            H[p]=t;
+        }
+        k++;
+    }
+    // second pop the top element in heap and add new element from its corresponding neighbor list
+    long long part_mem_address=part_mem_size*part_num+frT_no;
+    for(k--;k>=1;)
+    {
+        // update the count of butterflies
+        int nowElement=H[1].element;
+        //store nowElement into memory
+        // startTime=wtime();
+        Sorted_NB[part_mem_address]=nowElement;
+        // storeTime=wtime()-startTime;
+        part_mem_address+=num_frT;
+        // add the next ej8lement into heap
+        H[1].now++;
+        if (H[1].now>=H[1].end) 
+        {
+            struct heap t;
+            t=H[1];
+            H[1]=H[k];
+            H[k]=t;
+            k--;
+        }
+        else H[1].element=*(H[1].now);
+
+        // update the heap
+        int p=1;
+        for(;;)
+        {
+            if (p*2>k) break; 
+            p*=2;
+            if (p+1<=k&&H[p].element>H[p+1].element) p++;
+            if (H[p].element<H[p/2].element)
+            {
+                struct heap t;
+            }
+            
+        }
+        
+
+    }
+
+    
+}
+//get heapBased VertexCounting
+__device__ 
+void heapBased_Counting( int vertex, long long *beginPos,int *edgelist,int *Sorted_NB,int num_frT, int num_srT, int part_mem_size,int part_num, unsigned long long *count,double *load_time)
+{
+    struct heap H[11];
+    H[0].element=-1;
+    int k=1;
+    double startTime,loadTime;
+    for (int oneHopNeighborID=k-1; oneHopNeighborID<num_frT; oneHopNeighborID++)
+    {
+        int list_length=0;
+        for(int i=oneHopNeighborID*10;i<beginPos[vertex+1]-beginPos[vertex]&&i<10*k;i++)
+        {
+            //i is the No. of vertex nb in the current list
+            //beginPos[vertex]+i: the pos of this neighbor in the edgelist , to get  the neighbor
+            //edgelist[beginPos[vertex]+i]: id of this neighbor
+            list_length+=beginPos[edgelist[beginPos[vertex]+i]+1]-beginPos[edgelist[beginPos[vertex]+i]];
+        }
+        // startTime=wtime();
+        int oneHopNeighbor=Sorted_NB[part_mem_size*part_num+oneHopNeighborID];
+        // loadTime=startTime-wtime();
+        if (oneHopNeighbor<=vertex) break;
+        // get the first neighbor in each oneHopNeighbor's neighbor list 
+        // startTime=wtime();
+        H[k].end=Sorted_NB+list_length*num_frT-num_frT+k-1+part_num*part_mem_size;
+        H[k].now=Sorted_NB+part_num*part_mem_size+k-1;
+        if (H[k].now>=H[k].end)  continue;
+        H[k].element=*H[k].now;
+        // loadTime+=startTime-wtime();
+        // update the heap
+        int p=k;
+        while (H[p].element<H[p/2].element)
+        {
+            struct heap t;
+            t=H[p];
+            H[p]=H[p/2];
+            p/=2;
+            H[p]=t;
+        }
+        k++;
+    }
+    int previousElement=-1,cc=1;
+    // second pop the top element in heap and add new element from its corresponding neighbor list
+    for(k--;k>=1;)
+    {
+        // update the count of butterflies
+        int nowElement=H[1].element;
+        if (nowElement==previousElement) {cc++;}
+        else { *count+=cc*(cc-1)/2; cc=1; previousElement=nowElement;}
+
+        // add the next element into heap
+        H[1].now+=num_frT;
+        // startTime=wtime();
+        if (H[1].now>=H[1].end) 
+        {
+            struct heap t;
+            t=H[1];
+            H[1]=H[k];
+            H[k]=t;
+            k--;
+        }
+        
+        else H[1].element=*(H[1].now);
+        // loadTime+=startTime-wtime();
+        // update the heap
+        int p=1;
+        for(;;)
+        {
+            if (p*2>k) break;
+            p*=2;
+            if (p+1<=k&&H[p].element>H[p+1].element) p++;
+            if (H[p].element<H[p/2].element)
+            {
+                struct heap t;
+                t=H[p];
+                H[p]=H[p/2];
+                H[p/2]=t;
+            }
+            else
+            break;
+        }
+        
+
+    }
+    //*load_time+=loadTime;
+    *count+=cc*(cc-1)/2; // the last series of element need to be added
+}
+__device__ 
+void heapBasedPerVertexCounting(int vertex, long long *beginPos, int *edgeList, int num_frT, int num_srT, int *Sorted_NB, int *available, int part_mem_size, unsigned long long *count,double *store_time,double *load_time)
+{
+    struct heap H[11];
+    H[0].element=-1;
+    int k=1;
+    int part_num=0;
+    //n threads of first round of heap_based NB-list
+    if(threadIdx.x%(num_frT+num_srT)<num_frT)
+    {
+        //Get first round 2-hop NB-list
+        part_num=part_num%(num_srT);//in which part of assigned memory
+        //set memory ready 0 
+        if(available[part_num]==0)
+        {
+          //set memory available=0: in processing
+          heapBased_Sorted2Hop(vertex, beginPos, edgeList, num_frT,num_srT, Sorted_NB, part_mem_size,part_num++,store_time);
+          atomicAdd(available+part_num,1);
+          //set memory available=1: new data ready
+        }
+    }
+    //m thread of second round of heap_based 
+    else
+    {   //if ready
+        //Secon round  merge 2-hop NB-list and count Butterfly
+        if(available[threadIdx.x%(num_frT+num_srT)]==num_frT)
+        {
+          heapBased_Counting(vertex,beginPos,edgeList,Sorted_NB,num_frT, num_srT,part_mem_size,threadIdx.x%(num_frT+num_srT)-num_frT,count,load_time);
+          atomicMin(available+threadIdx.x%(num_frT+num_srT)-num_frT,0);
+          //set memory available=0: in processing
+        }
+        
+    }
+    
+}
+
+
+__global__ 
+void D_heapBasedButterflyCounting_old(long long *beginPos, int *edgeList, int *Sorted_NB, int part_mem_size,int num_srT, int num_frT, int uCount, int vCount, unsigned long long* globalCount, int* perVertexCount, int* hashTable, int startVertex, int endVertex,double *global_store_time,double *global_load_time)
+{
+    __shared__ unsigned long long sharedCount;
+    extern __shared__  int a[];
+    int * available=a;
+    //__shared__ 
+    if (threadIdx.x==0) sharedCount=0;
+    unsigned long long count=0;
+    double store_time=0,load_time=0;
+    //define the number of threads executing each round of merging: num_frT and num_srT
+    int num_VT=num_srT+num_frT;
+    int part=threadIdx.x%num_VT-num_frT;
+    available[part]=0;
+    int part_num=0;
+    for (int vertex=startVertex+blockIdx.x*blockDim.x/num_VT+threadIdx.x/num_VT; vertex<endVertex; vertex+=gridDim.x*blockDim.x/num_VT)
+    {
+        // count=0;
+        //Sorted_NB: memory stored intermediate result of nb_list
+        //part_mem_size: the size of a partition of memory assigned to one vertex for its nb_list
+        //num of memory partition is num_srT£¬the num of thread for second round merging
+        //available: if the part of memory is available with data ready
+        //heapBasedPerVertexCounting(vertex, beginPos, edgeList,num_frT,num_srT, Sorted_NB,available, part_mem_size,&count,&store_time,&load_time);
+        // perVertexCount[vertex]=count;
+        if(threadIdx.x%(num_frT+num_srT)<num_frT)
+        {
+            //Get first round 2-hop NB-list
+            part_num=part_num%(num_srT);//in which part of assigned memory
+            if(available[part_num]==0)
+            {
+              //set memory available=0: in processing
+              heapBased_Sorted2Hop(vertex, beginPos, edgeList, num_frT,num_srT, Sorted_NB, part_mem_size,part_num++,&store_time);
+              atomicAdd(available+part_num,1);
+              //set memory available=1: new data ready
+            }
+        }
+        //m thread of second round of heap_based ,Secon round  merge 2-hop NB-list and count Butterfly
+        else
+        { 
+            if(available[threadIdx.x%(num_frT+num_srT)]==num_frT)
+            {
+              heapBased_Counting(vertex,beginPos,edgeList,Sorted_NB,num_frT, num_srT,part_mem_size,threadIdx.x%(num_frT+num_srT)-num_frT,&count,&load_time);
+              atomicMin(available+threadIdx.x%(num_frT+num_srT)-num_frT,0);
+              //set memory available=0: in processing
+            }
+            
+        }
+    }
+    atomicAdd(&sharedCount,count);
+    __syncthreads();
+    if (threadIdx.x==0) atomicAdd(globalCount,sharedCount);
+  //  atomicAdd(global_store_time,store_time);
+  //  atomicAdd(global_load_time,load_time);
+}

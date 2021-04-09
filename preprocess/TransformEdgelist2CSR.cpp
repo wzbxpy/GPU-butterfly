@@ -96,6 +96,7 @@ void deleteNoneNeighborVertex()
         int u=uMap[edgelist[i].u];
         int v=vMap[edgelist[i].v]+uCount;
         vertex[u].edge.push_back(v);
+        cout<<"push_back"<<u<<"and"<<v<<endl;
     }
 }
 void deleteDuplicateEdge()

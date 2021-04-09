@@ -1,7 +1,8 @@
 #include <iostream>
 #include "graph.h"
-#include "butterfly.h"
 #include <string>
+#include <cstdlib>
+#include <cstdio>
 
 using namespace std;
 
@@ -15,15 +16,28 @@ void printGraph(graph bipartiteGraph)
 }
 int main(int argc, char* argv[])
 {
-    string folerName;
+    string path;
     if (argc>1)
     {
-        folerName=argv[1];
+        path=argv[1];
+    }
+    int p=0;
+    if (argc>1)
+    {
+        p=atoi(argv[2]);
     }
     graph bipartiteGraph;
-    bipartiteGraph.loadgraph(folerName);
-    cout<<bipartiteGraph.edgeCount<<endl;
+    if (p)
+    {
+        bipartiteGraph.loadgraph(path);
+    }
+    else
+    {
+        bipartiteGraph.loadWangkaiGraph(path);
+    }
 
+    cout<<bipartiteGraph.edgeCount<<endl;
+    cout<<bipartiteGraph.uCount<<' '<<bipartiteGraph.vCount<<endl;
     // printGraph(bipartiteGraph);
-    BC(bipartiteGraph);
+    // BC(bipartiteGraph);
 }

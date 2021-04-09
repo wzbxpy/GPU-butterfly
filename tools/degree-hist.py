@@ -11,7 +11,7 @@ rcParams['font.serif'] = ['Times New Roman'] + rcParams['font.serif']
 rcParams['font.size'] = 13.5
 
 print(matplotlib.get_cachedir())
-path='/root/hypergraph/dataset/twitter'
+path='/home/ubuntu/hypergraph/dataset/twitter'
 if (len(sys.argv)>1):
     path=str(sys.argv[1])
 print(path)
@@ -47,4 +47,4 @@ plt.xlabel('degree')
 # labels = plt.get_xticklabels() + plt.get_yticklabels()
 # [label.set_fontname('Times New Roman') for label in labels]
 
-plt.savefig('/root/hypergraph/figure/1-hop-degree.pdf')
+plt.savefig('/home/ubuntu/hypergraph/GPU-butterfly/1-hop-degree.pdf')
