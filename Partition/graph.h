@@ -17,10 +17,10 @@ public:
     long long edgeCount;
     int length;
     int partitionNum;
-    void loadgraph(string folderName);
-    void loadSubgraph(string foldername, int id);
+    void loadGraph(string folderName);
     void loadWangkaiGraph(string folderName);
     void patitionGraph(int num);
+    void storeGraph(string folderName);
     ~graph();
 };
 

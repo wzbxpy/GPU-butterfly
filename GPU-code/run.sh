@@ -1,4 +1,3 @@
-cd ~/GPU-butterfly/GPU-code
 make -j
 # make clean
 make test

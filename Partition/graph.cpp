@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <vector>
 #include <memory>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 using namespace std;
 bool cmp1(int a, int b)
@@ -12,7 +14,7 @@ bool cmp1(int a, int b)
     return a > b;
 }
 
-void graph::loadgraph(string path)
+void graph::loadGraph(string path)
 {
     printf("Loading graph...\n");
     fstream propertiesFile(path + "/properties.txt", ios::in);
@@ -37,10 +39,6 @@ void graph::loadgraph(string path)
     breakVertex32 = lower_bound(deg, deg + n, 32, cmp1) - deg;
     vertexCount = uCount + vCount;
     delete (deg);
-}
-
-void graph::loadSubgraph(string path, int id)
-{
 }
 
 void graph::loadWangkaiGraph(string path)
@@ -98,22 +96,22 @@ void graph::loadWangkaiGraph(string path)
 void graph::patitionGraph(int num)
 {
     partitionNum = num;
-    subBeginPosSecond = new vector<long long>[num];
-    subEdgeListSecond = new vector<int>[num];
-    unique_ptr<vector<vector<int>>[]> a(new vector<vector<int>>[num]);
-    length = (uCount + vCount) / num + 1;
-    for (int i = 0; i < num; i++)
+    subBeginPosSecond = new vector<long long>[partitionNum];
+    subEdgeListSecond = new vector<int>[partitionNum];
+    unique_ptr<vector<vector<int>>[]> a(new vector<vector<int>>[partitionNum]);
+    length = (uCount + vCount) / partitionNum + 1;
+    for (int i = 0; i < partitionNum; i++)
         a[i].resize(uCount + vCount);
     for (int i = 0; i < uCount + vCount; i++)
     {
         for (long long j = beginPos[i]; j < beginPos[i + 1]; j++)
         {
             int dstVertex = edgeList[j];
-            int id = dstVertex % num;
+            int id = dstVertex % partitionNum;
             a[id][i].push_back(dstVertex);
         }
     }
-    for (int n = 0; n < num; n++)
+    for (int n = 0; n < partitionNum; n++)
     {
         long long count = 0;
         for (int i = 0; i < uCount + vCount; i++)
@@ -126,14 +124,37 @@ void graph::patitionGraph(int num)
         subBeginPosSecond[n].push_back(count);
     }
     int sum = 0;
-    for (int n = 0; n < num; n++)
+    for (int n = 0; n < partitionNum; n++)
     {
         sum += subEdgeListSecond[n].size();
         cout << "id:" << n << " edgenum:" << subEdgeListSecond[n].size() << endl;
     }
 }
+
+void graph::storeGraph(string path)
+{
+    string partitionedFolder = path + "partition" + to_string(partitionNum) + '/';
+    mkdir(partitionedFolder.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
+    for (int i = 0; i <= partitionNum; i++)
+    {
+        fstream propertiesFile(partitionedFolder + "/properties" + to_string(i) + ".txt", ios::out);
+        propertiesFile << subBeginPosSecond[i].size() << subEdgeListSecond[i].size() << endl;
+        propertiesFile.close();
+        fstream beginFile(partitionedFolder + "/begin" + to_string(i) + ".bin", ios::out | ios::binary);
+        beginFile.write((char *)subBeginPosSecond, sizeof(long long) * (subBeginPosSecond[i].size()));
+        beginFile.close();
+        fstream adjFile(partitionedFolder + "/adj" + to_string(i) + ".bin", ios::out | ios::binary);
+        adjFile.write((char *)subEdgeListSecond, sizeof(int) * (subEdgeListSecond[i].size()));
+        adjFile.close();
+    }
+}
+
 graph::~graph()
 {
     delete (beginPos);
     delete (edgeList);
+    delete (subEdgeListFirst);
+    delete (subEdgeListSecond);
+    delete (subBeginPosFirst);
+    delete (subBeginPosSecond);
 }

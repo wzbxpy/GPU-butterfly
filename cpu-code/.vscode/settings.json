@@ -1,0 +1,22 @@
+{
+    "files.associations": {
+        "*.s": "bat",
+        "*.py": "python",
+        "*.cu": "cuda-cpp",
+        "iostream": "cpp",
+        "valarray": "cpp",
+        "*.tcc": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "chrono": "cpp",
+        "random": "cpp",
+        "limits": "cpp",
+        "iosfwd": "cpp",
+        "fstream": "cpp"
+    },
+    "python.formatting.provider": "autopep8"
+}

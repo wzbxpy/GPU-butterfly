@@ -3,7 +3,7 @@ N=1
 cucc= "$(shell which nvcc)"
 cc= "$(shell which g++)"
 commflags=-lcudart -L"$(shell dirname $(cucc))"/../lib64  -O3 -W -Wall -Wno-unused-function -Wno-unused-parameter
-cuflags= --compiler-options -Wall --gpu-architecture=compute_70 --gpu-code=sm_70 -m64 -c -O3   # --resource-usage 
+cuflags= --compiler-options -Wall --gpu-architecture=compute_80 --gpu-code=sm_80 -m64 -c -O3   # --resource-usage 
 
 .SILENT: cucc
 .SILENT: cc
@@ -42,4 +42,4 @@ clean:
 	rm -rf *.o countingAlgorithm/*.o $(exe)
 
 test:
-	./butterfly.bin ../../dataset/bipartite/test1/ 1
+	./butterfly.bin /home/lyx/datasets/bipartite/twitter/sorted/ default

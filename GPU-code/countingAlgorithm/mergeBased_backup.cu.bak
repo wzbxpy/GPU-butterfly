@@ -1,0 +1,273 @@
+#include <iostream>
+#include "../globalPara.h"
+#ifdef DEBUG
+#define DBGprint(...) printf(__VA_ARGS__)
+#else
+#define DBGprint(...)
+#endif
+#define MAXINT 2147483641
+#define FULL_MASK 0xffffffff
+using namespace std;
+#define subwarpSize 8
+#define subwarpNum (32 / subwarpSize)
+#define sharedElementSize blockSize *subwarpSize
+
+struct marker
+{
+    int element;
+    int *globalNow;
+    int localNow;
+    int len;
+};
+__device__ void mergeBasedPerVertexCounting__backup(int vertex, long long *beginPos, int *edgeList, int *hashTable, int uCount, int vCount, unsigned long long *count)
+{
+
+    int warpId = threadIdx.x / 32;
+    int threadId = threadIdx.x % 32;
+    struct marker h;
+    h.element = MAXINT;
+    int bound;
+
+    // first creat the marker
+    for (int oneHopNeighborID = beginPos[vertex] + threadId; oneHopNeighborID < beginPos[vertex + 1]; oneHopNeighborID += 32)
+    {
+        int oneHopNeighbor = edgeList[oneHopNeighborID];
+        // get the first neighbor in each oneHopNeighbor's neighbor list
+        bound = vertex < oneHopNeighbor ? vertex : oneHopNeighbor;
+
+        int start = beginPos[oneHopNeighbor];
+        int end = beginPos[oneHopNeighbor + 1];
+        h.globalNow = edgeList + start;
+        h.len = end - start;
+        if (h.len > 0)
+        {
+            int element = *(h.globalNow);
+            if (element < bound)
+                h.element = element;
+            else
+                h.len = -1;
+            h.len--;
+            h.globalNow++;
+        }
+    }
+    int previousElement = -1, cc = 1;
+    // second pop the top element in marker and add new element from its corresponding neighbor list
+    for (;;)
+    {
+        int element = h.element;
+        int id = threadId;
+        int needBreak = 0;
+        for (int offset = 16; offset > 0; offset /= 2)
+        {
+            int otherElement = __shfl_down_sync(FULL_MASK, element, offset);
+            int otherId = __shfl_down_sync(FULL_MASK, id, offset);
+            if (otherElement < element)
+            {
+                element = otherElement;
+                id = otherId;
+            }
+        }
+        __syncwarp();
+
+        if (threadId == 0)
+        {
+            if (element == MAXINT)
+            {
+                needBreak = 1;
+            }
+            else if (element == previousElement)
+            {
+                cc++;
+            }
+            else
+            {
+                *count += cc * (cc - 1) / 2;
+                cc = 1;
+                previousElement = element;
+            }
+        }
+        __syncwarp();
+        needBreak = __shfl_sync(FULL_MASK, needBreak, 0);
+        if (needBreak)
+        {
+            break;
+        }
+        id = __shfl_sync(FULL_MASK, id, 0);
+
+        if (threadId == id)
+        {
+            h.element = MAXINT;
+            if (h.len > 0)
+            {
+                int element = *(h.globalNow);
+                if (element < bound)
+                    h.element = element;
+                else
+                    h.len = -1;
+                h.len--;
+                h.globalNow++;
+            }
+        }
+    }
+    *count += cc * (cc - 1) / 2; // the last series of element need to be added
+}
+
+__device__ void mergeBasedPerVertexCounting(int vertex, long long *beginPos, int *edgeList, int *hashTable, int uCount, int vCount, unsigned long long *count)
+{
+    __shared__ int sharedElement[sharedElementSize];
+    int warpId = threadIdx.x / 32;
+    int threadId = threadIdx.x % 32;
+    int subwarpId = threadId / subwarpSize;
+    int subThreadId = threadId % subwarpSize;
+    struct marker h;
+    int localElements;
+    int bound;
+    int sharedStartPostition = (warpId * 32 + subwarpSize * subwarpId) * subwarpSize;
+    int mypos = sharedStartPostition + subThreadId * subwarpSize;
+    h.element = MAXINT;
+    h.len = -1;
+    h.localNow = 0;
+
+    for (int oneHopNeighborID = beginPos[vertex] + threadId; oneHopNeighborID < beginPos[vertex + 1]; oneHopNeighborID += 32)
+    {
+        int oneHopNeighbor = edgeList[oneHopNeighborID];
+        // set the bound
+        bound = vertex < oneHopNeighbor ? vertex : oneHopNeighbor;
+        int start = beginPos[oneHopNeighbor];
+        int end = beginPos[oneHopNeighbor + 1];
+        h.globalNow = edgeList + start;
+        h.len = end - start;
+        // printf("firstele:%d,%d,%d\n", threadId, *h.globalNow, h.len);
+    }
+    for (int i = 0; i < subwarpSize; i++)
+    {
+        // another choice
+        // int mask = ((1 << (subwarpSize)) - 1) << (threadId / subwarpSize * subwarpSize);
+        // int len = __shfl_sync(mask, h.len, threadId / subwarpSize * subwarpSize + i);
+        int mask = ((1 << (subwarpSize)) - 1);
+        int len = __shfl_sync(mask, h.len, i, subwarpSize);
+        int *globalNow = (int *)__shfl_sync(mask, (unsigned long long)h.globalNow, i, subwarpSize);
+        if (subThreadId < len)
+            sharedElement[sharedStartPostition + i * subwarpSize + subThreadId] = *(globalNow + subThreadId);
+    }
+    __syncwarp();
+    if (h.len > 0)
+    {
+
+        int pos = mypos + h.localNow;
+        int element = *(h.globalNow);
+
+        element = sharedElement[pos];
+        if (element < bound)
+            h.element = element;
+        else
+            h.len = -1;
+        h.len--;
+        h.localNow = (h.localNow + 1) % subwarpSize;
+        h.globalNow++;
+    }
+    int previousElement = -1, cc = 1;
+    // second pop the top element in marker and add new element from its corresponding neighbor list
+    for (;;)
+    {
+        __syncwarp();
+        int element = h.element;
+        int id = threadId;
+        int needBreak = 0;
+        for (int offset = 16; offset > 0; offset /= 2)
+        {
+            int otherElement = __shfl_down_sync(FULL_MASK, element, offset);
+            int otherId = __shfl_down_sync(FULL_MASK, id, offset);
+            if (otherElement < element)
+            {
+                element = otherElement;
+                id = otherId;
+            }
+        }
+
+        __syncwarp();
+
+        if (threadId == 0)
+        {
+            if (element == MAXINT)
+            {
+                needBreak = 1;
+            }
+            else if (element == previousElement)
+            {
+                cc++;
+            }
+            else
+            {
+                *count += cc * (cc - 1) / 2;
+                cc = 1;
+                previousElement = element;
+            }
+        }
+        __syncwarp();
+
+        needBreak = __shfl_sync(FULL_MASK, needBreak, 0);
+        if (needBreak)
+        {
+            break;
+        }
+        id = __shfl_sync(FULL_MASK, id, 0);
+
+        if (threadId == id)
+        {
+            h.element = MAXINT;
+            if (h.len > 0)
+            {
+                // int pos = mypos + h.localNow;
+                // int element = *(h.globalNow);
+
+                int element = sharedElement[mypos + h.localNow];
+                if (element < bound)
+                    h.element = element;
+                else
+                    h.len = -1;
+                h.len--;
+                h.localNow = (h.localNow + 1) % subwarpSize;
+                h.globalNow++;
+            }
+        }
+        __syncwarp();
+        int localNow = __shfl_sync(FULL_MASK, h.localNow, id);
+        if (localNow > 0)
+            continue;
+        int len = __shfl_sync(FULL_MASK, h.len, id, subwarpSize);
+        int *globalNow = (int *)__shfl_sync(FULL_MASK, (unsigned long long)h.globalNow, id);
+        if (subwarpId != id / subwarpSize)
+            continue;
+        if (subThreadId < len)
+        {
+            sharedElement[sharedStartPostition + (id % subwarpSize) * subwarpSize + subThreadId] = *(globalNow + subThreadId);
+        }
+    }
+    *count += cc * (cc - 1) / 2; // the last series of element need to be added
+}
+
+__global__ void mergeBasedButterflyCounting(long long *beginPos, int *edgeList, int uCount, int vCount, unsigned long long *globalCount, int *perVertexCount, int *hashTable, int startVertex, int endVertex)
+{
+    __shared__ unsigned long long sharedCount;
+    if (threadIdx.x == 0)
+        sharedCount = 0;
+    unsigned long long count = 0;
+    int warpId = threadIdx.x / 32;
+    int warpNum = blockDim.x / 32;
+    for (int vertex = startVertex + blockIdx.x * warpNum + warpId; vertex < endVertex; vertex += gridDim.x * warpNum)
+    {
+        // count=0;
+        mergeBasedPerVertexCounting__backup(vertex, beginPos, edgeList, hashTable, uCount, vCount, &count);
+        // perVertexCount[vertex]=count;
+    }
+    if (threadIdx.x % 32 == 0)
+    {
+        atomicAdd(&sharedCount, count);
+    }
+    __syncthreads();
+    if (threadIdx.x == 0)
+    {
+        atomicAdd(globalCount, sharedCount);
+    }
+}

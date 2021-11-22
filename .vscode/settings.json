@@ -1,3 +1,11 @@
 {
-    "python.pythonPath": "/usr/bin/python3"
+    "python.pythonPath": "/usr/bin/python3",
+    "files.associations": {
+        "ostream": "cpp",
+        "iostream": "cpp",
+        "vector": "cpp",
+        "random": "cpp",
+        "memory": "cpp"
+    },
+    "python.formatting.provider": "autopep8"
 }
