@@ -34,25 +34,6 @@ LL hashInsert(hashNode *hashList, int key, int mod, int t)
     }
 }
 
-//typedef tbb::concurrent_hash_map<int,LL> HashTable;
-
-// LL hashInsert(HashTable& hashList, int val){
-//     HashTable::accessor a;
-//     LL res = 0;
-//     hashList.insert(a, val);
-//     res = a->second;
-//     a->second += 1;
-//     // if (hashList.find(a, val)){
-//     //     res = a->second;
-//     //     a->second += 1;
-//     //     a.release();
-//     // }else{
-//     //     hashList.insert(a, val);
-//     //     a->second = 1;
-//     //     a.release();
-//     // }
-//     return res;
-// }
 res test(char *path, int bound, int threadNum)
 {
     tbb::tick_count mainStartTime = tbb::tick_count::now();

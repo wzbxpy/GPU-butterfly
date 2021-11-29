@@ -20,7 +20,8 @@ public:
     void loadgraph(string folderName);
     void loadSubgraph(string foldername, int id);
     void loadWangkaiGraph(string folderName);
-    void patitionGraph(int num);
+    void partitionGraphFirst(int num);
+    void partitionGraphSecond(int num);
     ~graph();
 };
 

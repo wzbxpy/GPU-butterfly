@@ -1,4 +1,5 @@
 #include "graph.h"
+// #include "wtime.h"
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -24,8 +25,13 @@ void graph::loadgraph(string path)
     propertiesFile.close();
     fstream beginFile(path + "/begin.bin", ios::in | ios::binary);
     fstream adjFile(path + "/adj.bin", ios::in | ios::binary);
+
+    double startTime = clock();
     beginFile.read((char *)beginPos, sizeof(long long) * (uCount + vCount + 1));
     adjFile.read((char *)edgeList, sizeof(int) * (edgeCount));
+    cout << "time: " << (clock() - startTime) / CLOCKS_PER_SEC << endl;
+    // cout << "time: " << (wtime() - startTime)  << endl;
+
     beginFile.close();
     adjFile.close();
 
@@ -41,6 +47,10 @@ void graph::loadgraph(string path)
 
 void graph::loadSubgraph(string path, int id)
 {
+    for (int i = 0; i < 10; i++)
+        for (int j = 0; j < 10; j++)
+        {
+        }
 }
 
 void graph::loadWangkaiGraph(string path)
@@ -95,7 +105,32 @@ void graph::loadWangkaiGraph(string path)
     delete (nid);
 }
 
-void graph::patitionGraph(int num)
+void graph::partitionGraphFirst(int num)
+{
+    partitionNum = num;
+    subBeginPosFirst = new vector<long long>[num];
+    subEdgeListFirst = new vector<int>[num];
+    long long *count = new long long[num];
+    for (int n = 0; n < num; n++)
+        count[n] = 0;
+    for (int i = 0; i < uCount + vCount; i++)
+    {
+        int n = i % partitionNum;
+        subBeginPosFirst[n].push_back(count[n]);
+        count[n] += beginPos[i + 1] - beginPos[i];
+        for (int j = beginPos[i]; j < beginPos[i + 1]; j++)
+            subEdgeListFirst[n].push_back(edgeList[j]);
+        // subEdgeListFirst[n].insert(subEdgeListFirst[n].end(), edgeList + beginPos[i], edgeList + beginPos[i + 1]);
+    }
+    for (int n = 0; n < num; n++)
+    {
+        subBeginPosFirst[n].push_back(count[n]);
+        // cout << "id:" << n << " edgenum:" << subEdgeListFirst[n].size() << endl;
+    }
+    delete (count);
+}
+
+void graph::partitionGraphSecond(int num)
 {
     partitionNum = num;
     subBeginPosSecond = new vector<long long>[num];
@@ -129,7 +164,7 @@ void graph::patitionGraph(int num)
     for (int n = 0; n < num; n++)
     {
         sum += subEdgeListSecond[n].size();
-        cout << "id:" << n << " edgenum:" << subEdgeListSecond[n].size() << endl;
+        // cout << "id:" << n << " edgenum:" << subEdgeListSecond[n].size() << endl;
     }
 }
 graph::~graph()
