@@ -6,7 +6,7 @@
 using namespace std;
 using namespace cooperative_groups;
 // #define subgroupSize 32
-#define dynamic_scheduling
+// #define dynamic_scheduling
 
 __global__ void hashPartition(long long *beginPosFirst, int *edgeListFirst, long long *beginPosSecond, int *edgeListSecond, unsigned long long *globalCount, int *perVertexCount, int *hashTable, int startVertex, int endVertex, int length, int partitionNum, int vertexOffsets, int *nextVertex)
 {
@@ -35,7 +35,6 @@ __global__ void hashPartition(long long *beginPosFirst, int *edgeListFirst, long
     {
 #endif
         int vertexDegree = beginPosFirst[vertex + 1] - beginPosFirst[vertex];
-
         // put the two hop neighbor of vertex into hash map
 
         for (int oneHopNeighborID = beginPosFirst[vertex] + threadIdx.x / 32; oneHopNeighborID < beginPosFirst[vertex + 1]; oneHopNeighborID += 32)
@@ -50,11 +49,7 @@ __global__ void hashPartition(long long *beginPosFirst, int *edgeListFirst, long
                 count += atomicAdd(&hashTable[(twoHopNeighbor / partitionNum) + blockIdx.x * (length)], 1);
             }
         }
-        // thisBlock.sync();
-        // this_thread_block().sync();
         __syncthreads();
-        // if (threadIdx.x + blockIdx.x == 0)
-        //     printf("%d thread num\n", thisBlock.size());
 
         // reset the hash map
         if (vertexDegree * vertexDegree > length) //choose the lower costs method

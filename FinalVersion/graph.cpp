@@ -15,40 +15,45 @@ bool cmp1(int a, int b)
     return a > b;
 }
 
-void graph::loadgraph(string path)
+void graph::loadProperties(string path)
 {
-    printf("Loading graph...\n");
     fstream propertiesFile(path + "/properties.txt", ios::in);
     propertiesFile >> uCount >> vCount >> edgeCount;
-    cout << "properties: " << uCount << " " << vCount << " " << edgeCount << endl;
-    edgeCount *= 2;
     vertexCount = uCount + vCount;
-    beginPos = new long long[vertexCount + 1];
-    edgeList = new int[edgeCount];
     propertiesFile.close();
+}
+
+double graph::loadGraph(string path)
+{
+    // cout << "Loading graph..." << path << endl;
+    loadProperties(path);
+    if (beginPos == nullptr)
+        beginPos = new long long[vertexCount + 1];
+    if (edgeList == nullptr)
+        edgeList = new int[edgeCount];
     fstream beginFile(path + "/begin.bin", ios::in | ios::binary);
     fstream adjFile(path + "/adj.bin", ios::in | ios::binary);
-
     double startTime = clock();
     beginFile.read((char *)beginPos, sizeof(long long) * (vertexCount + 1));
     adjFile.read((char *)edgeList, sizeof(int) * (edgeCount));
-    cout << "time: " << (clock() - startTime) / CLOCKS_PER_SEC << endl;
+    double time = (clock() - startTime) / CLOCKS_PER_SEC;
+    // cout << "time: " << (clock() - startTime) / CLOCKS_PER_SEC << endl;
     // cout << "time: " << (wtime() - startTime)  << endl;
-
     beginFile.close();
     adjFile.close();
-
-    int *deg = new int[vertexCount];
-    int n = vertexCount;
-    for (int i = 0; i < vertexCount; ++i)
-        deg[i] = beginPos[i + 1] - beginPos[i];
-    breakVertex10 = lower_bound(deg, deg + n, 10, cmp1) - deg;
-    breakVertex32 = lower_bound(deg, deg + n, 32, cmp1) - deg;
-    delete (deg);
+    return time;
+    // int *deg = new int[vertexCount];
+    // int n = vertexCount;
+    // for (int i = 0; i < vertexCount; ++i)
+    //     deg[i] = beginPos[i + 1] - beginPos[i];
+    // breakVertex10 = lower_bound(deg, deg + n, 10, cmp1) - deg;
+    // breakVertex32 = lower_bound(deg, deg + n, 32, cmp1) - deg;
+    // delete (deg);
 }
 
-void graph::loadSubgraph(string path, int id, bool isSrc)
+void graph::loadSubGraph(string path, int id, bool isSrc)
 {
+    cout << "load subgraph" << endl;
     //initialize path
     string prefix = isSrc ? "/src" : "/dst";
     prefix = path + prefix + to_string(id);
@@ -127,7 +132,7 @@ void graph::loadWangkaiGraph(string path)
 
 void graph::partitionGraphSrc(int num)
 {
-    partitionNum = num;
+    partitionNumSrc = num;
     subBeginPosFirst = new vector<long long>[num];
     subEdgeListFirst = new vector<int>[num];
     unique_ptr<long long[]> count{new long long[num]};
@@ -135,7 +140,7 @@ void graph::partitionGraphSrc(int num)
         count[n] = 0;
     for (int i = 0; i < uCount + vCount; i++)
     {
-        int n = i % partitionNum;
+        int n = i % num;
         subBeginPosFirst[n].push_back(count[n]);
         count[n] += beginPos[i + 1] - beginPos[i];
         for (int j = beginPos[i]; j < beginPos[i + 1]; j++)
@@ -151,7 +156,7 @@ void graph::partitionGraphSrc(int num)
 
 void graph::partitionGraphDst(int num)
 {
-    partitionNum = num;
+    partitionNumDst = num;
     subBeginPosSecond = new vector<long long>[num];
     subEdgeListSecond = new vector<int>[num];
     unique_ptr<vector<vector<int>>[]> a(new vector<vector<int>>[num]);
@@ -189,42 +194,45 @@ void graph::partitionGraphDst(int num)
 
 void storeSubgraph(string prefix, vector<long long> subBeginPos, vector<int> subEdgeList)
 {
-    fstream propertiesFile(prefix + "/properties.txt", ios::out);
-    propertiesFile << subBeginPos.size() - 1 << subEdgeList.size() << endl;
+    mkdir(prefix.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
+    fstream propertiesFile(prefix + "properties.txt", ios::out);
+    propertiesFile << 0 << ' ' << subBeginPos.size() - 1 << ' ' << subEdgeList.size() << endl;
     propertiesFile.close();
-    fstream beginFile(prefix + "/begin.bin", ios::out | ios::binary);
+    fstream beginFile(prefix + "begin.bin", ios::out | ios::binary);
     beginFile.write((char *)&subBeginPos[0], sizeof(long long) * (subBeginPos.size()));
     beginFile.close();
-    fstream adjFile(prefix + "/adj.bin", ios::out | ios::binary);
+    fstream adjFile(prefix + "adj.bin", ios::out | ios::binary);
     adjFile.write((char *)&subEdgeList[0], sizeof(int) * (subEdgeList.size()));
     adjFile.close();
 }
 
 void graph::storeGraph(string path)
 {
-    string partitionedFolder = path + "partition" + to_string(partitionNum) + '/';
-    mkdir(partitionedFolder.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
-    for (int i = 0; i <= partitionNum; i++)
+    string partitionedFolder = path + "partition";
+    // mkdir(partitionedFolder.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
+    for (int i = 0; i < partitionNumSrc; i++)
     {
-        storeSubgraph(partitionedFolder + "/src" + to_string(i), subBeginPosSecond[i], subEdgeListSecond[i]);
+        storeSubgraph(partitionedFolder + to_string(partitionNumSrc) + "src" + to_string(i) + "/", subBeginPosFirst[i], subEdgeListFirst[i]);
     }
-    for (int i = 0; i <= partitionNum; i++)
+    for (int i = 0; i < partitionNumDst; i++)
     {
-        storeSubgraph(partitionedFolder + "/dst" + to_string(i), subBeginPosFirst[i], subEdgeListFirst[i]);
+        storeSubgraph(partitionedFolder + to_string(partitionNumDst) + "dst" + to_string(i) + "/", subBeginPosSecond[i], subEdgeListSecond[i]);
     }
 }
+
 graph::~graph()
 {
+
     if (beginPos != nullptr)
         delete (beginPos);
     if (edgeList != nullptr)
         delete (edgeList);
-    if (subEdgeListFirst != nullptr)
-        delete (subEdgeListFirst);
-    if (subEdgeListSecond != nullptr)
-        delete (subEdgeListSecond);
-    if (subBeginPosFirst != nullptr)
-        delete (subBeginPosFirst);
-    if (subBeginPosSecond != nullptr)
-        delete (subBeginPosSecond);
+    // if (subEdgeListFirst != nullptr)
+    //     delete (subEdgeListFirst);
+    // if (subEdgeListSecond != nullptr)
+    //     delete (subEdgeListSecond);
+    // if (subBeginPosFirst != nullptr)
+    //     delete (subBeginPosFirst);
+    // if (subBeginPosSecond != nullptr)
+    //     delete (subBeginPosSecond);
 }

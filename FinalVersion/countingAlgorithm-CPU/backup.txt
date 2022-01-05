@@ -1,0 +1,149 @@
+
+void edgeCentric_unorderedMap(graph *G, int threadNum)
+{
+    int vertexCount = G->vertexCount;
+    long long *beginPosFirst = G->beginPos;  // LL[vertexCount + 1];
+    int *edgeListFirst = G->edgeList;        // int[G->edgeCount];
+    long long *beginPosSecond = G->beginPos; // LL[vertexCount + 1];
+    int *edgeListSecond = G->edgeList;       // int[G->edgeCount];
+    unique_ptr<unordered_map<int, int>[]> hashTable(new unordered_map<int, int>[threadNum]);
+
+    cout << threadNum << " startt! ";
+    cilk::reducer_opadd<long long> ans;
+    double startTime = wtime();
+    __cilkrts_end_cilk();
+    __cilkrts_set_param("nworkers", to_string(threadNum).c_str());
+
+    cilk_for(int i = 0; i < threadNum; i++)
+    {
+        long long partSum = 0;
+        for (int vertex = i; vertex < vertexCount; vertex += threadNum)
+        {
+            for (int oneHopNeighborID = beginPosFirst[vertex]; oneHopNeighborID < beginPosFirst[vertex + 1]; oneHopNeighborID += 1)
+            {
+                int oneHopNeighbor = edgeListFirst[oneHopNeighborID];
+                int bound = vertex < oneHopNeighbor ? vertex : oneHopNeighbor;
+                for (int twoHopNeighborID = beginPosSecond[oneHopNeighbor]; twoHopNeighborID < beginPosSecond[oneHopNeighbor + 1]; twoHopNeighborID += 1)
+                {
+                    int twoHopNeighbor = edgeListSecond[twoHopNeighborID];
+                    if (twoHopNeighbor >= bound)
+                        break;
+                    partSum += hashTable[i][twoHopNeighbor];
+                    hashTable[i][twoHopNeighbor]++;
+                }
+            }
+            hashTable[i].clear();
+        }
+        ans += partSum;
+    }
+    cout << ans.get_value() << " " << wtime() - startTime << endl;
+    //delete beginPos;
+    //delete edgeList;
+}
+
+void edgeCentric_cilk(graph *G, int threadNum)
+{
+    int vertexCount = G->vertexCount;
+    long long *beginPosFirst = G->beginPos;  // LL[vertexCount + 1];
+    int *edgeListFirst = G->edgeList;        // int[G->edgeCount];
+    long long *beginPosSecond = G->beginPos; // LL[vertexCount + 1];
+    int *edgeListSecond = G->edgeList;       // int[G->edgeCount];
+    unique_ptr<int[]> hashTable(new int[threadNum * vertexCount]);
+
+    cout << threadNum << " startt! ";
+    // atomic<long long> ans;
+    cilk::reducer_opadd<long long> ans;
+
+    // ans = 0;
+    double startTime = wtime();
+    __cilkrts_end_cilk();
+    __cilkrts_set_param("nworkers", to_string(threadNum).c_str());
+
+    cilk_for(int threadId = 0; threadId < threadNum; threadId++)
+    {
+        long long partSum = 0;
+        for (int vertex = threadId; vertex < vertexCount; vertex += threadNum)
+        {
+            int vertexDegree = beginPosFirst[vertex + 1] - beginPosFirst[vertex];
+            for (int oneHopNeighborID = beginPosFirst[vertex]; oneHopNeighborID < beginPosFirst[vertex + 1]; oneHopNeighborID += 1)
+            {
+                int oneHopNeighbor = edgeListFirst[oneHopNeighborID];
+                int bound = vertex < oneHopNeighbor ? vertex : oneHopNeighbor;
+                for (int twoHopNeighborID = beginPosSecond[oneHopNeighbor]; twoHopNeighborID < beginPosSecond[oneHopNeighbor + 1]; twoHopNeighborID += 1)
+                {
+                    int twoHopNeighbor = edgeListSecond[twoHopNeighborID];
+                    if (twoHopNeighbor >= bound)
+                        break;
+                    partSum += hashTable[threadId * vertexCount + twoHopNeighbor];
+                    hashTable[threadId * vertexCount + twoHopNeighbor]++;
+                }
+            }
+            if (vertexDegree * vertexDegree > vertexCount) //choose the lower costs method
+            {
+                for (int i = threadId * vertexCount; i < (threadId + 1) * vertexCount; i++)
+                {
+                    hashTable[i] = 0;
+                }
+            }
+            else
+            {
+                for (int oneHopNeighborID = beginPosFirst[vertex]; oneHopNeighborID < beginPosFirst[vertex + 1]; oneHopNeighborID += 1)
+                {
+                    int oneHopNeighbor = edgeListFirst[oneHopNeighborID];
+                    int bound = vertex < oneHopNeighbor ? vertex : oneHopNeighbor;
+                    for (int twoHopNeighborID = beginPosSecond[oneHopNeighbor]; twoHopNeighborID < beginPosSecond[oneHopNeighbor + 1]; twoHopNeighborID += 1)
+                    {
+                        int twoHopNeighbor = edgeListSecond[twoHopNeighborID];
+                        if (twoHopNeighbor >= bound)
+                            break;
+                        hashTable[threadId * vertexCount + twoHopNeighbor] = 0;
+                    }
+                }
+            }
+        }
+        // cout << threadId << " " << partSum << endl;
+        ans += partSum;
+    }
+    cout << ans.get_value() << " " << wtime() - startTime << endl;
+}
+
+
+void sharedHashTable(graph *G, int threadNum)
+{
+    int vertexCount = G->vertexCount;
+    long long *beginPosFirst = G->beginPos;  // LL[vertexCount + 1];
+    int *edgeListFirst = G->edgeList;        // int[G->edgeCount];
+    long long *beginPosSecond = G->beginPos; // LL[vertexCount + 1];
+    int *edgeListSecond = G->edgeList;       // int[G->edgeCount];
+    tbb::interface5::concurrent_unordered_map<int, int> hashTable;
+    // unordered_map<int, int> hashTable;
+    cout << threadNum << " startt! ";
+    cilk::reducer_opadd<long long> ans;
+    double startTime = wtime();
+    __cilkrts_end_cilk();
+    __cilkrts_set_param("nworkers", to_string(threadNum).c_str());
+
+    for (int vertex = 0; vertex < vertexCount; vertex++)
+    {
+        cilk_for(int oneHopNeighborID = beginPosFirst[vertex]; oneHopNeighborID < beginPosFirst[vertex + 1]; oneHopNeighborID += 1)
+        {
+            int oneHopNeighbor = edgeListFirst[oneHopNeighborID];
+            int bound = vertex < oneHopNeighbor ? vertex : oneHopNeighbor;
+            for (int twoHopNeighborID = beginPosSecond[oneHopNeighbor]; twoHopNeighborID < beginPosSecond[oneHopNeighbor + 1]; twoHopNeighborID += 1)
+            {
+                int twoHopNeighbor = edgeListSecond[twoHopNeighborID];
+                if (twoHopNeighbor >= bound)
+                    break;
+                // ans += hashTable.count(twoHopNeighbor);
+                // hashTable.insert(twoHopNeighbor, 1);
+                // ans += hashTable[twoHopNeighbor];
+                hashTable[twoHopNeighbor]++;
+            }
+        }
+        hashTable.clear();
+    }
+
+    cout << ans.get_value() << " " << wtime() - startTime << endl;
+    //delete beginPos;
+    //delete edgeList;
+}

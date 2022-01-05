@@ -17,18 +17,19 @@ int initializeCudaPara(int deviceId, int numThreads, T func)
     cudaDeviceProp deviceProp;
     cudaGetDeviceProperties(&deviceProp, deviceId);
     cudaOccupancyMaxActiveBlocksPerMultiprocessor(&numBlocksPerSm, func, numThreads, 0);
-    cout << deviceProp.multiProcessorCount << "  " << numBlocksPerSm << endl;
+    // cout << deviceProp.multiProcessorCount << "  " << numBlocksPerSm << endl;
     int numBlocks = deviceProp.multiProcessorCount * numBlocksPerSm;
     return numBlocks;
 }
 
-int BC_edge_centric(graph *G)
+int BC_edge_centric(graph *G, int numBlocks)
 {
     double startTime, exectionTime;
 
     int numThreads = 1024;
-    int numBlocks = initializeCudaPara(dev, numThreads, hashCentric);
-    numBlocks = 128;
+    // int numBlocks = initializeCudaPara(dev, numThreads, hashCentric);
+    // numThreads = 1;
+    // numBlocks = 1;
 
     long long *D_beginPos;
     int *D_edgeList;
@@ -39,7 +40,7 @@ int BC_edge_centric(graph *G)
     HRR(cudaMemcpy(D_beginPos, G->beginPos, sizeof(long long) * (G->uCount + G->vCount + 1), cudaMemcpyHostToDevice));
     HRR(cudaMemcpy(D_edgeList, G->edgeList, sizeof(int) * (G->edgeCount), cudaMemcpyHostToDevice));
     exectionTime = wtime() - startTime;
-    cout << "load graph elapsed time: " << exectionTime << endl;
+    // cout << "load graph elapsed time: " << exectionTime << endl;
     int total_size = sizeof(int) * (G->edgeCount * 2);
     int *perVertexCount;
     HRR(cudaMallocManaged((void **)&perVertexCount, sizeof(int) * (G->uCount + G->vCount + 1)));
@@ -64,13 +65,13 @@ int BC_edge_centric(graph *G)
 
     startTime = wtime();
     double transferTime = 0, computeTime = 0;
-    for (int j = 0; j < G->partitionNum; j++)
+    for (int j = 0; j < G->partitionNumSrc; j++)
     // for (int j = 0; j < 1; j++)
     {
 
         HRR(cudaMemcpy(D_beginPos_first, &(G->subBeginPosFirst[j][0]), sizeof(long long) * (G->subBeginPosFirst[j].size()), cudaMemcpyHostToDevice));
         HRR(cudaMemcpy(D_edgeList_first, &(G->subEdgeListFirst[j][0]), sizeof(int) * (G->subEdgeListFirst[j].size()), cudaMemcpyHostToDevice));
-        for (int i = 0; i < G->partitionNum; i++)
+        for (int i = 0; i < G->partitionNumSrc; i++)
         {
             // cout << i << ' ' << j << endl;
             *nextVertex = numBlocks;
@@ -80,37 +81,34 @@ int BC_edge_centric(graph *G)
             // *globalCount = 0;
             transferTime += wtime() - startTime;
             startTime = wtime();
-            hashPartition<<<numBlocks, numThreads>>>(D_beginPos_first, D_edgeList_first, D_beginPos_second, D_edgeList_second, globalCount, perVertexCount, hashTable, 0, G->subBeginPosFirst[j].size() - 1, G->length, G->partitionNum, j, nextVertex);
+            hashPartition<<<numBlocks, numThreads>>>(D_beginPos_first, D_edgeList_first, D_beginPos_second, D_edgeList_second, globalCount, perVertexCount, hashTable, 0, G->subBeginPosFirst[j].size() - 1, G->length, G->partitionNumSrc, j, nextVertex);
             HRR(cudaDeviceSynchronize());
             computeTime += wtime() - startTime;
             // cout << G->uCount + G->vCount << endl;
+            cout << *globalCount << endl;
         }
     }
-    cout << *globalCount << endl;
     exectionTime = wtime() - startTime;
+    cout << numBlocks << ' ' << *globalCount << ' ';
     cout << transferTime << ' ' << computeTime << endl;
     // cout << *globalCount << ' ' << exectionTime << endl;
-
-    cout << endl;
 
     // HRR(cudaMemcpy((void **)&host_list,(void **)&Sorted_List,sizeof(int)*(G->edgeCount), cudaMemcpyDeviceToHost));
 
     HRR(cudaFree(D_beginPos));
     HRR(cudaFree(D_edgeList));
-
     // delete(perVertexCount);
     return 0;
 }
 
-int BC_wedge_centric(graph *G)
+int BC_wedge_centric(graph *G, int numBlocks)
 {
-
     double startTime, exectionTime;
 
     long long *D_beginPos;
     int *D_edgeList;
     int numThreads = 1024;
-    int numBlocks = initializeCudaPara(dev, numThreads, hashCentric);
+    // int numBlocks = initializeCudaPara(dev, numThreads, hashCentric);
 
     HRR(cudaMalloc(&D_beginPos, sizeof(long long) * (G->uCount + G->vCount + 1)));
     HRR(cudaMalloc(&D_edgeList, sizeof(int) * (G->edgeCount)));
@@ -141,11 +139,11 @@ int BC_wedge_centric(graph *G)
     *globalCount = 0;
     startTime = wtime();
     double transferTime = 0, computeTime = 0;
-    for (int i = 0; i < G->partitionNum; i++)
+    for (int i = 0; i < G->partitionNumSrc; i++)
     {
         HRR(cudaMemcpy(D_beginPos_first, &(G->subBeginPosSecond[i][0]), sizeof(long long) * (G->subBeginPosSecond[i].size()), cudaMemcpyHostToDevice));
         HRR(cudaMemcpy(D_edgeList_first, &(G->subEdgeListSecond[i][0]), sizeof(int) * (G->subEdgeListSecond[i].size()), cudaMemcpyHostToDevice));
-        for (int j = 0; j < G->partitionNum; j++)
+        for (int j = 0; j < G->partitionNumSrc; j++)
         {
             // cout << i << ' ' << j << endl;
             *nextVertex = numBlocks;
@@ -158,9 +156,9 @@ int BC_wedge_centric(graph *G)
             // clearHashTable<<<G->length, 1024>>>(hashTable, G->length);
             // HRR(cudaDeviceSynchronize());
             int startVertex = 0;
-            void *kernelArgs[] = {&D_beginPos_first, &D_edgeList_first, &D_beginPos_second, &D_edgeList_second, &globalCount, &hashTable, &startVertex, &G->vertexCount, &G->length, &G->partitionNum};
+            void *kernelArgs[] = {&D_beginPos_first, &D_edgeList_first, &D_beginPos_second, &D_edgeList_second, &globalCount, &hashTable, &startVertex, &G->vertexCount, &G->length, &G->partitionNumSrc};
             cudaLaunchCooperativeKernel((void *)hashCentric, numBlocks, numThreads, kernelArgs);
-            // hashCentric<<<numBlocks, 1024>>>(D_beginPos_first, D_edgeList_first, D_beginPos_second, D_edgeList_second, globalCount, hashTable, 0, G->uCount + G->vCount, G->length, G->partitionNum);
+            // hashCentric<<<numBlocks, 1024>>>(D_beginPos_first, D_edgeList_first, D_beginPos_second, D_edgeList_second, globalCount, hashTable, 0, G->uCount + G->vCount, G->length, G->partitionNumSrc);
             HRR(cudaDeviceSynchronize());
             computeTime += wtime() - startTime;
             // cout << *globalCount << endl;
@@ -178,10 +176,10 @@ int BC_wedge_centric(graph *G)
     return 0;
 }
 
-int BC_GPU(graph *G, bool isEdgeCentric)
+int BC_GPU(graph *G, int numBlocks, bool isEdgeCentric)
 {
     if (isEdgeCentric)
-        BC_edge_centric(G);
+        BC_edge_centric(G, numBlocks);
     else
-        BC_wedge_centric(G);
+        BC_wedge_centric(G, numBlocks);
 }

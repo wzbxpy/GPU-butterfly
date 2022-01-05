@@ -1,6 +1,4 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
-make: *** No rule to make target 'all'.  Stop.
- 
 # GNU Make 4.1
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2014 Free Software Foundation, Inc.
@@ -8,7 +6,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Dec 24 11:32:07 2021
+# Make data base, printed on Tue Jan  4 17:20:05 2022
 
 # Variables
 
@@ -35,7 +33,7 @@ CURDIR := /home/wzb/bc/GPU-butterfly
 # makefile
 SHELL = /bin/sh
 # environment
-VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"92f61bb58ac5751fbb82c3c2359454f5.zh-cn","_translationsConfigFile":"/home/wzb/.vscode-server/data/clp/92f61bb58ac5751fbb82c3c2359454f5.zh-cn/tcf.json","_cacheRoot":"/home/wzb/.vscode-server/data/clp/92f61bb58ac5751fbb82c3c2359454f5.zh-cn","_resolvedLanguagePackCoreLocation":"/home/wzb/.vscode-server/data/clp/92f61bb58ac5751fbb82c3c2359454f5.zh-cn/899d46d82c4c95423fb7e10e68eba52050e30ba3","_corruptedFile":"/home/wzb/.vscode-server/data/clp/92f61bb58ac5751fbb82c3c2359454f5.zh-cn/corrupted.info","_languagePackSupport":true}
+VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn","_translationsConfigFile":"/home/wzb/.vscode-server/data/clp/85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn/tcf.json","_cacheRoot":"/home/wzb/.vscode-server/data/clp/85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn","_resolvedLanguagePackCoreLocation":"/home/wzb/.vscode-server/data/clp/85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn/899d46d82c4c95423fb7e10e68eba52050e30ba3","_corruptedFile":"/home/wzb/.vscode-server/data/clp/85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn/corrupted.info","_languagePackSupport":true}
 # environment
 _ = /home/wzb/.vscode-server/bin/899d46d82c4c95423fb7e10e68eba52050e30ba3/node
 # makefile
@@ -57,7 +55,7 @@ LC_NAME = zh_CN.UTF-8
 # environment
 VSCODE_CWD = /home/wzb
 # environment
-SSH_CONNECTION = 172.16.0.61 55248 172.16.0.71 22
+SSH_CONNECTION = 172.16.0.61 40824 172.16.0.71 22
 # environment
 PATH = /home/wzb/.vscode-server/bin/899d46d82c4c95423fb7e10e68eba52050e30ba3/bin:/home/wzb/.local/bin:/home/wzb/anaconda3/bin:/home/wzb/anaconda3/condabin:/usr/local/cuda-11.2/bin:/home/wzb/.vscode-server/bin/899d46d82c4c95423fb7e10e68eba52050e30ba3/bin:/home/wzb/.local/bin:/usr/local/cuda-11.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
@@ -81,7 +79,7 @@ VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /home/wzb/bc/GPU-butterfly
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/1004/vscode-ipc-7c7e45aa-8834-4b6c-a9f4-7da3d031cd86.sock
+VSCODE_IPC_HOOK_CLI = /run/user/1004/vscode-ipc-22ec3c9b-f344-4b38-9239-c5b035eb70d1.sock
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -115,7 +113,7 @@ MAKECMDGOALS := all
 # environment
 SHLVL = 3
 # environment
-XDG_SESSION_ID = 1149
+XDG_SESSION_ID = 1427
 # environment
 USER = wzb
 # environment
@@ -130,8 +128,6 @@ LC_TELEPHONE = zh_CN.UTF-8
 CONDA_SHLVL = 1
 # default
 MAKE_COMMAND := make
-# environment
-OLDPWD = /home/wzb/.vscode-server/bin/899d46d82c4c95423fb7e10e68eba52050e30ba3
 # default
 .VARIABLES := 
 # automatic
@@ -141,7 +137,7 @@ MAKEFLAGS = pqrR
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_CLIENT = 172.16.0.61 55248 22
+SSH_CLIENT = 172.16.0.61 40824 22
 # environment
 MAIL = /var/mail/wzb
 # automatic
@@ -185,7 +181,7 @@ VSCODE_EXTHOST_WILL_SEND_SOCKET = true
 # environment
 _CE_CONDA = 
 # variable set hash-table stats:
-# Load=86/1024=8%, Rehash=0, Collisions=14/108=13%
+# Load=85/1024=8%, Rehash=0, Collisions=14/107=13%
 
 # Pattern-specific Variable Values
 
@@ -193,9 +189,9 @@ _CE_CONDA =
 
 # Directories
 
-# . (device 2050, inode 56610425): 17 files, no impossibilities.
+# . (device 2050, inode 56610425): 18 files, no impossibilities.
 
-# 17 files, no impossibilities in 1 directories.
+# 18 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -245,12 +241,14 @@ GNUmakefile:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 25 / storage = 252 B / avg = 10 B
-# current buf: size = 8162 B / used = 252 B / count = 25 / avg = 10 B
+# strcache buffers: 1 (0) / strings = 26 / storage = 266 B / avg = 10 B
+# current buf: size = 8162 B / used = 266 B / count = 26 / avg = 10 B
 
-# strcache performance: lookups = 28 / hit rate = 10%
+# strcache performance: lookups = 29 / hit rate = 10%
 # hash-table stats:
-# Load=25/8192=0%, Rehash=0, Collisions=1/28=4%
-# Finished Make data base on Fri Dec 24 11:32:07 2021
+# Load=26/8192=0%, Rehash=0, Collisions=1/29=3%
+# Finished Make data base on Tue Jan  4 17:20:05 2022
 
+ 
+make: *** No rule to make target 'all'.  Stop.
  

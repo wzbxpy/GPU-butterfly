@@ -2,7 +2,7 @@ exe=butterfly.bin
 N=1
 cucc= "$(shell which nvcc)"
 cc= "$(shell which g++)"
-commflags=-fcilkplus -ltbb -lcudart -L"$(shell dirname $(cucc))"/../lib64  -O3 -W -Wall -Wno-unused-function -Wno-unused-parameter
+commflags=-fcilkplus -ltbb -lcudart -L"$(shell dirname $(cucc))"/../lib64  -O3 -W -Wall -Wno-unused-function -Wno-unused-parameter -g
 cuflags= --compiler-options -Wall --gpu-architecture=compute_80 --gpu-code=sm_80 -m64 -c -O3   # --resource-usage 
 
 .SILENT: cucc
@@ -45,4 +45,8 @@ clean:
 	rm -rf *.o countingAlgorithm-GPU/*.o countingAlgorithm-CPU/*.o $(exe)
 
 test:
-	./butterfly.bin /home/lyx/datasets/bipartite/twitter/sorted/ default
+	# ./butterfly.bin /home/wzb/bc/Graph500KroneckerGraphGenerator/test/ default
+	# ./butterfly.bin /home/shbing/datasetsNew/datasets/bipartite/livejournal/sorted/ default
+	# ./butterfly.bin /home/shbing/datasetsNew/datasets/bipartite/orkut/sorted/ default
+	./butterfly.bin /home/wzb/bc/dataset/twitter/ Partition 100 edge-centric 1073741824 1 2
+ 

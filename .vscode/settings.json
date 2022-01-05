@@ -39,7 +39,9 @@
         "unordered_set": "cpp",
         "bitset": "cpp",
         "fstream": "cpp",
-        "__config": "cpp"
+        "__config": "cpp",
+        "initializer_list": "cpp",
+        "thread": "cpp"
     },
     "python.formatting.provider": "autopep8"
 }
