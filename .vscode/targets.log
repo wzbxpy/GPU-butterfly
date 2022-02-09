@@ -1,4 +1,6 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+make: *** No rule to make target 'all'.  Stop.
+ 
 # GNU Make 4.1
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2014 Free Software Foundation, Inc.
@@ -6,7 +8,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Tue Jan  4 17:20:05 2022
+# Make data base, printed on Wed Feb  9 15:17:33 2022
 
 # Variables
 
@@ -33,9 +35,9 @@ CURDIR := /home/wzb/bc/GPU-butterfly
 # makefile
 SHELL = /bin/sh
 # environment
-VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn","_translationsConfigFile":"/home/wzb/.vscode-server/data/clp/85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn/tcf.json","_cacheRoot":"/home/wzb/.vscode-server/data/clp/85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn","_resolvedLanguagePackCoreLocation":"/home/wzb/.vscode-server/data/clp/85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn/899d46d82c4c95423fb7e10e68eba52050e30ba3","_corruptedFile":"/home/wzb/.vscode-server/data/clp/85dc8b33bfa057e31dfd84e9a10f67e1.zh-cn/corrupted.info","_languagePackSupport":true}
+VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"bcb43daf7fc7aee39837fa8516ffebcd.zh-cn","_translationsConfigFile":"/home/wzb/.vscode-server/data/clp/bcb43daf7fc7aee39837fa8516ffebcd.zh-cn/tcf.json","_cacheRoot":"/home/wzb/.vscode-server/data/clp/bcb43daf7fc7aee39837fa8516ffebcd.zh-cn","_resolvedLanguagePackCoreLocation":"/home/wzb/.vscode-server/data/clp/bcb43daf7fc7aee39837fa8516ffebcd.zh-cn/5554b12acf27056905806867f251c859323ff7e9","_corruptedFile":"/home/wzb/.vscode-server/data/clp/bcb43daf7fc7aee39837fa8516ffebcd.zh-cn/corrupted.info","_languagePackSupport":true}
 # environment
-_ = /home/wzb/.vscode-server/bin/899d46d82c4c95423fb7e10e68eba52050e30ba3/node
+_ = /home/wzb/.vscode-server/bin/5554b12acf27056905806867f251c859323ff7e9/node
 # makefile
 MAKEFILE_LIST := 
 # 'override' directive
@@ -55,9 +57,9 @@ LC_NAME = zh_CN.UTF-8
 # environment
 VSCODE_CWD = /home/wzb
 # environment
-SSH_CONNECTION = 172.16.0.61 40824 172.16.0.71 22
+SSH_CONNECTION = 172.16.0.61 59202 172.16.0.71 22
 # environment
-PATH = /home/wzb/.vscode-server/bin/899d46d82c4c95423fb7e10e68eba52050e30ba3/bin:/home/wzb/.local/bin:/home/wzb/anaconda3/bin:/home/wzb/anaconda3/condabin:/usr/local/cuda-11.2/bin:/home/wzb/.vscode-server/bin/899d46d82c4c95423fb7e10e68eba52050e30ba3/bin:/home/wzb/.local/bin:/usr/local/cuda-11.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+PATH = /home/wzb/.vscode-server/bin/5554b12acf27056905806867f251c859323ff7e9/bin/remote-cli:/home/wzb/.local/bin:/usr/local/cuda-11.6/bin:/home/wzb/anaconda3/bin:/home/wzb/anaconda3/condabin:/usr/local/cuda-11.2/bin:/home/wzb/.vscode-server/bin/5554b12acf27056905806867f251c859323ff7e9/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
 XDG_RUNTIME_DIR = /run/user/1004
 # environment
@@ -79,21 +81,21 @@ VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /home/wzb/bc/GPU-butterfly
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/1004/vscode-ipc-22ec3c9b-f344-4b38-9239-c5b035eb70d1.sock
+VSCODE_IPC_HOOK_CLI = /run/user/1004/vscode-ipc-a845f6c9-2d1f-49c4-a490-871ae2e30e82.sock
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
-VSCODE_AMD_ENTRYPOINT = vs/server/remoteExtensionHostProcess
+VSCODE_AMD_ENTRYPOINT = vs/workbench/services/extensions/node/extensionHostProcess
 # environment
 HOME = /home/wzb
 # environment
-LD_LIBRARY_PATH = /usr/local/cuda-11.2/lib64:/usr/local/cuda-11.2/lib64
+LD_LIBRARY_PATH = /usr/local/cuda-11.6/lib64:/usr/local/cuda-11.2/lib64
 # environment
 LESSCLOSE = /usr/bin/lesspipe %s %s
 # environment
 LOGNAME = wzb
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # environment
 CONDA_PROMPT_MODIFIER = (base) 
 # automatic
@@ -113,7 +115,7 @@ MAKECMDGOALS := all
 # environment
 SHLVL = 3
 # environment
-XDG_SESSION_ID = 1427
+XDG_SESSION_ID = 537
 # environment
 USER = wzb
 # environment
@@ -137,15 +139,13 @@ MAKEFLAGS = pqrR
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_CLIENT = 172.16.0.61 40824 22
+SSH_CLIENT = 172.16.0.61 59202 22
 # environment
 MAIL = /var/mail/wzb
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # environment
-BROWSER = /home/wzb/.vscode-server/bin/899d46d82c4c95423fb7e10e68eba52050e30ba3/bin/helpers/browser.sh
-# environment
-LC_IDENTIFICATION = zh_CN.UTF-8
+BROWSER = /home/wzb/.vscode-server/bin/5554b12acf27056905806867f251c859323ff7e9/bin/helpers/browser.sh
 # default
 MAKEFILES := 
 # automatic
@@ -167,7 +167,7 @@ _CE_M =
 # default
 .INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
 # environment
-VSCODE_INJECT_NODE_MODULE_LOOKUP_PATH = /home/wzb/.vscode-server/bin/899d46d82c4c95423fb7e10e68eba52050e30ba3/remote/node_modules
+LC_IDENTIFICATION = zh_CN.UTF-8
 # default
 .RECIPEPREFIX := 
 # environment
@@ -181,7 +181,7 @@ VSCODE_EXTHOST_WILL_SEND_SOCKET = true
 # environment
 _CE_CONDA = 
 # variable set hash-table stats:
-# Load=85/1024=8%, Rehash=0, Collisions=14/107=13%
+# Load=84/1024=8%, Rehash=0, Collisions=13/106=12%
 
 # Pattern-specific Variable Values
 
@@ -189,9 +189,9 @@ _CE_CONDA =
 
 # Directories
 
-# . (device 2050, inode 56610425): 18 files, no impossibilities.
+# . (device 2050, inode 56610425): 19 files, no impossibilities.
 
-# 18 files, no impossibilities in 1 directories.
+# 19 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -241,14 +241,12 @@ GNUmakefile:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 26 / storage = 266 B / avg = 10 B
-# current buf: size = 8162 B / used = 266 B / count = 26 / avg = 10 B
+# strcache buffers: 1 (0) / strings = 27 / storage = 279 B / avg = 10 B
+# current buf: size = 8162 B / used = 279 B / count = 27 / avg = 10 B
 
-# strcache performance: lookups = 29 / hit rate = 10%
+# strcache performance: lookups = 30 / hit rate = 10%
 # hash-table stats:
-# Load=26/8192=0%, Rehash=0, Collisions=1/29=3%
-# Finished Make data base on Tue Jan  4 17:20:05 2022
+# Load=27/8192=0%, Rehash=0, Collisions=1/30=3%
+# Finished Make data base on Wed Feb  9 15:17:33 2022
 
- 
-make: *** No rule to make target 'all'.  Stop.
  

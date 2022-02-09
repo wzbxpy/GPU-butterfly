@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 #include <memory>
+#include <cmath>
 
 using namespace std;
 
@@ -59,6 +60,10 @@ void printb(shared_ptr<vector<int>[]> b)
 void loadGeneratedGraph(string path)
 {
     fstream propertiesInFile(path + "/properties1.txt", ios::in);
+    long long vertexpower, degree;
+    // propertiesInFile >> vertexpower >> degree;
+    // vertexCount = powl(2, vertexpower);
+    // edgeCount = degree * vertexCount;
     propertiesInFile >> vertexCount >> edgeCount;
     propertiesInFile.close();
     unique_ptr<uint32_t[]> a(new uint32_t[edgeCount * 2]);
@@ -73,10 +78,8 @@ void loadGeneratedGraph(string path)
         b[u].push_back(v);
         b[v].push_back(u);
     }
-    printb(b);
 
     removeDuplicatedEdgeAndSelfLoop(b);
-    printb(b);
     struct node *idDegree = new struct node[vertexCount];
     for (int i = 0; i < vertexCount; i++)
     {
@@ -95,7 +98,6 @@ void loadGeneratedGraph(string path)
             dst = newid[dst];
         sort(b[i].begin(), b[i].end());
     }
-    printb(b);
     ofstream beginFile(path + "/begin.bin", ios::out | ios::binary);
     ofstream adjFile(path + "/adj.bin", ios::out | ios::binary);
     long long sum = 0;

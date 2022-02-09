@@ -1,6 +1,6 @@
 #include <iostream>
 #include "graph.h"
-#include "butterfly-GPU.h"
+#include "countingAlgorithm-GPU/butterfly-GPU.h"
 #include "countingAlgorithm-CPU/butterfly-CPU.h"
 #include <string>
 #include <cstdlib>
@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
     graph *G = new graph;
     parameter para;
     string loadOption = "default";
+    string Platform = "GPU";
     if (argc > 2)
     {
         loadOption = argv[2];
@@ -53,7 +54,8 @@ int main(int argc, char *argv[])
     }
     if (loadOption == "Partition")
     {
-        G->loadGraph(path);
+        G->loadProperties(path);
+        cout << "prperties " << G->vertexCount << " " << G->edgeCount << endl;
         if (argc > 3)
         {
             para.partitionNum = atoi(argv[3]);
@@ -68,21 +70,35 @@ int main(int argc, char *argv[])
                     para.batchNum = atoi(argv[7]);
                 if (a4 == "wedge-centric")
                 {
-                    para.partitionNum = ceil(G->vertexCount / sqrt(para.memorySize / sizeof(atomic<int>)));
-                    cout << "wc partition num: " << para.partitionNum << " ";
+                    double memoryForWedges = (para.memorySize - (double)G->vertexCount * sizeof(long long) * 2) / sizeof(int);
+                    double edgeSize = G->edgeCount * 2 / para.batchNum;
+                    para.partitionNum = ceil(G->vertexCount / sqrt(memoryForWedges)) + ceil(edgeSize / memoryForWedges);
+                    cout << "wc partition num: " << para.partitionNum << endl;
                     para.varient = wedgecentric;
                 }
                 else
                 {
-                    para.partitionNum = ceil((G->edgeCount + G->vertexCount * para.processorNum / para.batchNum) / (para.memorySize / sizeof(int)));
-                    cout << "size:" << G->edgeCount << " " << para.memorySize << " " << G->edgeCount / (para.memorySize / sizeof(int)) << endl;
-                    cout << "ec partition num: " << para.partitionNum << " ";
+                    double memoryForEdges = (para.memorySize - (double)G->vertexCount * sizeof(long long) * 3) / sizeof(int);
+                    para.partitionNum = ceil((G->edgeCount * 2 + ((long long)G->vertexCount) / para.batchNum * para.processorNum) / memoryForEdges);
+                    cout << "ec partition num: " << para.partitionNum << endl;
                     para.varient = edgecentric;
                 }
             }
-            G->partitionGraphSrc(para.partitionNum);
-            G->partitionGraphDst(para.partitionNum * para.batchNum);
-            G->storeGraph(path);
+            if (argc > 8)
+                Platform = argv[8];
+            if (isSubgraphExist(path, para.partitionNum))
+            {
+                if (Platform == "GPU")
+                    G->loadAllSubgraphs(path, para.partitionNum);
+            }
+            else
+            {
+                G->loadGraph(path);
+                G->partitionGraphSrc(para.partitionNum);
+                G->partitionGraphDst(para.partitionNum);
+                G->storeGraph(path);
+            }
+            G->loadGraph(path);
         }
         else
         {
@@ -90,8 +106,10 @@ int main(int argc, char *argv[])
             return 0;
         }
     }
-    // BC_CPU(path, G, para, false);
-    BC_GPU(G, para.processorNum, true);
+    if (Platform == "GPU")
+        BC_GPU(G, para);
+    else
+        BC_CPU(path, G, para, false);
     // CPU benchmark
     // vector<int> threadsNumList = {1, 2, 4, 8, 16, 32, 56, 112};
     // vector<int> threadsNumList = {1};
