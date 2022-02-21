@@ -1,53 +1,5 @@
-"/usr/local/cuda-11.6/bin/nvcc" -c --compiler-options -Wall --gpu-architecture=compute_80 --gpu-code=sm_80 -m64 -c  -O3   countingAlgorithm-GPU/butterfly-GPU.cu  -o countingAlgorithm-GPU/butterfly-GPU.o 
-"/usr/bin/g++" countingAlgorithm-GPU/butterfly-GPU.o countingAlgorithm-GPU/hashCentric.o countingAlgorithm-CPU/butterfly-CPU.o wtime.o graph.o main.o  -fcilkplus -ltbb -lcudart -L"/usr/local/cuda-11.6/bin"/../lib64   -O3 -W -Wall -Wno-unused-function -Wno-unused-parameter  -o butterfly.bin
-prperties 65536 2846837980
-wc partition num: 6
-216 713111684509743184
-0.0121801 226.593 31.5926
-prperties 262144 3401673642
-wc partition num: 20
-216 353457784290804843
-0.199615 210.142 90.0841
-prperties 1048576 3634823506
-wc partition num: 71
-216 154263415049589396
-3.12882 479.109 302.606
-prperties 65536 2846837980
-ec partition num: 22
-216 713111684509743184
-0.0173414 313.871 59.1256
-prperties 262144 3401673642
-ec partition num: 26
-216 353457784290804843
-0.024466 383.167 82.3526
-prperties 1048576 3634823506
-ec partition num: 29
-216 154263415049589396
-0.0469661 447.881 108.374
-prperties 65536 2846837980
-wc partition num: 6
-here
-112 startt! 
-713111684509743184 0.874948 1925.6 26.316
-prperties 262144 3401673642
-wc partition num: 20
-here
-112 startt! 
-353457784290804843 4.5277 2247.97 104.873
-prperties 1048576 3634823506
-wc partition num: 71
-here
-112 startt! 
-154263415049589396 71.3919 16974.1 393.594
-prperties 65536 2846837980
-ec partition num: 22
-112 startt! 
-713111684509743184 1696.21 56.6697
-prperties 262144 3401673642
-ec partition num: 26
-112 startt! 
-353457784290804843 927.638 82.6848
-prperties 1048576 3634823506
-ec partition num: 29
-112 startt! 
-154263415049589396 1005.99 97.6618
+prperties 65536 2846837980 wc partition num: 6 numblocks216
+713111684509743184 226.746 33.7956
+prperties 262144 3401673642 wc partition num: 20 numblocks216
+353457784290804843 210.201 90.0069
+prperties 1048576 3634823506 wc partition num: 71 numblocks216

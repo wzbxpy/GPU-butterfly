@@ -36,7 +36,7 @@ void edgeCentric_kernel(shared_ptr<int[]> hashTable, graph *G_src, graph *G_dst,
     for (; vertex < G_src->vertexCount;)
     {
         int vertexDegree = G_src->beginPos[vertex + 1] - G_src->beginPos[vertex];
-        //creat hashtabel and count
+        // creat hashtabel and count
         for (int oneHopNeighborID = G_src->beginPos[vertex]; oneHopNeighborID < G_src->beginPos[vertex + 1]; oneHopNeighborID += 1)
         {
             int oneHopNeighbor = G_src->edgeList[oneHopNeighborID];
@@ -50,8 +50,8 @@ void edgeCentric_kernel(shared_ptr<int[]> hashTable, graph *G_src, graph *G_dst,
                 hashTable[threadId * maxVertexCount + (twoHopNeighbor / partitionNumDst)]++;
             }
         }
-        //clean hashtable
-        if (vertexDegree * vertexDegree / 10 > G_dst->vertexCount) //choose the lower costs method
+        // clean hashtable
+        if (vertexDegree * vertexDegree / 10 > G_dst->vertexCount) // choose the lower costs method
         {
             for (int i = threadId * maxVertexCount; i < (threadId + 1) * maxVertexCount; i++)
             {
@@ -73,14 +73,14 @@ void edgeCentric_kernel(shared_ptr<int[]> hashTable, graph *G_src, graph *G_dst,
                 }
             }
         }
-        //load next vertex
+        // load next vertex
         vertex = (vertex + 1) % chunckSize != 0 ? vertex + 1 : nextVertex->fetch_add(chunckSize);
     }
 }
 
 void edgeCentric(string path, parameter para)
 {
-    //initilize
+    // initilize
     graph *G_src = new graph;
     graph *G_dst = new graph;
     int threadNum = para.processorNum;
@@ -92,7 +92,7 @@ void edgeCentric(string path, parameter para)
     shared_ptr<atomic<int>> nextVertex(new atomic<int>(threadNum * chunckSize));
     memset(&hashTable[0], 0, sizeof(int) * threadNum * maxVertexCount);
     memset(&partSum[0], 0, sizeof(long long) * threadNum);
-    //launch threads
+    // launch threads
     thread threads[threadNum];
     cout << threadNum << " startt! " << endl;
     double startTime = wtime();
@@ -213,7 +213,7 @@ void wedgeCentric(string path, parameter para)
                 ans += partSum[i];
                 partSum[i] = 0;
             }
-            //clear hash table
+            // clear hash table
             if (G_first->edgeCount / double(G_first->vertexCount) > G_first->vertexCount / partitionNum)
             {
                 memset(&hashTable[0], 0, sizeof(int) * maxVertexCount * maxVertexCount);
@@ -261,7 +261,7 @@ void sharedHashTable_kernel(shared_ptr<atomic<int>[]> hashTable, graph *G, int t
                 // hashTable[threadId * vertexCount + twoHopNeighbor]++;
             }
         }
-        if (vertexDegree * vertexDegree > vertexCount) //choose the lower costs method
+        if (vertexDegree * vertexDegree > vertexCount) // choose the lower costs method
         {
             for (int i = threadId * vertexCount; i < (threadId + 1) * vertexCount; i++)
             {

@@ -28,7 +28,7 @@ __device__ void hashBasedPerVertexCounting(int vertex, long long *beginPos, int 
     __syncthreads();
 
     // reset the hash map
-    if (vertexDegree * vertexDegree > uCount + vCount) //choose the lower costs method
+    if (vertexDegree * vertexDegree > uCount + vCount) // choose the lower costs method
     {
         int start = 0, end = uCount + vCount;
         start += blockIdx.x * (uCount + vCount), end += blockIdx.x * (uCount + vCount);
@@ -76,7 +76,7 @@ __device__ void hashBasedPerVertexCounting_newDirection(int vertex, long long *b
             int twoHopNeighbor = edgeList[twoHopNeighborID];
             if (twoHopNeighbor >= bound)
                 break;
-            *count += atomicAdd(&hashTable[twoHopNeighbor + blockIdx.x * (uCount + vCount)], 1);
+            *count += atomicAdd(&hashTable[twoHopNeighbor + blockIdx.x * (long long)(uCount + vCount)], 1);
         }
         if (threadId == 0)
             oneHopNeighborID = atomicAdd(&nextOneHopNeighborID, 1);
@@ -87,11 +87,11 @@ __device__ void hashBasedPerVertexCounting_newDirection(int vertex, long long *b
     __syncthreads();
 
     // reset the hash map
-    if (vertexDegree * vertexDegree / 1000 > uCount + vCount) //choose the lower costs method
+    if (vertexDegree * vertexDegree / 1000 > uCount + vCount) // choose the lower costs method
     {
-        int start = 0, end = uCount + vCount;
-        start += blockIdx.x * (uCount + vCount), end += blockIdx.x * (uCount + vCount);
-        for (int i = start + threadIdx.x; i < end; i += blockDim.x)
+        long long start = 0, end = uCount + vCount;
+        start += blockIdx.x * (long long)(uCount + vCount), end += blockIdx.x * (long long)(uCount + vCount);
+        for (long long i = start + threadIdx.x; i < end; i += blockDim.x)
         {
             hashTable[i] = 0;
         }
@@ -110,7 +110,7 @@ __device__ void hashBasedPerVertexCounting_newDirection(int vertex, long long *b
                 int twoHopNeighbor = edgeList[twoHopNeighborID];
                 if (twoHopNeighbor >= bound)
                     break;
-                hashTable[twoHopNeighbor + blockIdx.x * (uCount + vCount)] = 0;
+                hashTable[twoHopNeighbor + blockIdx.x * (long long)(uCount + vCount)] = 0;
             }
             if (threadId == 0)
                 oneHopNeighborID = atomicAdd(&nextOneHopNeighborID, 1);
@@ -129,7 +129,7 @@ __global__ void hashBasedButterflyCounting(long long *beginPos, int *edgeList, i
     if (threadIdx.x == 0)
         sharedCount = 0;
     unsigned long long count = 0;
-    for (int i = threadIdx.x + blockIdx.x * (uCount + vCount); i < (1 + blockIdx.x) * (uCount + vCount); i += blockDim.x)
+    for (long long i = threadIdx.x + blockIdx.x * (uCount + vCount); i < (1 + blockIdx.x) * (uCount + vCount); i += blockDim.x)
     {
         hashTable[i] = 0;
     }

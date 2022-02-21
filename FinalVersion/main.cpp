@@ -90,8 +90,8 @@ int main(int argc, char *argv[])
             return 0;
         }
     }
-    // BC_CPU(path, G, para, false);
-    BC_GPU(G, para.processorNum, true);
+    BC_CPU(path, G, para, false);
+    // BC_GPU(G, para.processorNum, true);
     // CPU benchmark
     // vector<int> threadsNumList = {1, 2, 4, 8, 16, 32, 56, 112};
     // vector<int> threadsNumList = {1};

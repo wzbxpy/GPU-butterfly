@@ -37,7 +37,7 @@ struct GPUgraph
     long long *beginPos;
     int *edgeList;
     int vertexCount;
-    int edgeCount;
+    long long edgeCount;
     GPUgraph(int vertexNum, long long edgeNum)
     {
         vertexCount = vertexNum;
@@ -97,8 +97,10 @@ __global__ void initializeBeginPosition_GPUkernel(long long beginPosition[], lon
         {
             long long pos;
             for (pos = beginPosition[vertex]; pos < G.beginPos[vertex + 1]; pos++)
+            {
                 if (G.edgeList[pos] >= boundary)
                     break;
+            }
             endPosition[vertex] = pos;
         }
     }
@@ -165,6 +167,7 @@ edgeCentric_GPUkernel(GPUgraph G_src, GPUgraph G_dst, unsigned long long *global
 
         __syncthreads();
         loadNextVertex(vertex, nextVertex, nextVertexshared);
+        // vertex += gridDim.x;
     }
 
     atomicAdd(&sharedCount, count);
@@ -198,11 +201,11 @@ int BC_edge_centric(graph *G, parameter para)
     int *nextVertex;
     HRR(cudaMallocManaged(&nextVertex, sizeof(int)));
     int *hashTable;
-    int maxVertexCountInBatch = ceil(G->vertexCount / (double)para.batchNum / (double)partitionNum);
-    HRR(cudaMalloc(&hashTable, sizeof(int) * maxVertexCountInBatch * numBlocks));
-
+    long long maxVertexCountInBatch = ceil(G->vertexCount / (double)para.batchNum / (double)partitionNum);
+    HRR(cudaMalloc(&hashTable, maxVertexCountInBatch * numBlocks * sizeof(int)));
     GPUgraph G_src(G->subBeginPosFirst[0].size() - 1, G->subEdgeListFirst[0].size());
     GPUgraph G_dst(G->subBeginPosSecond[0].size() - 1, G->subEdgeListSecond[0].size());
+
     long long *D_Position;
     HRR(cudaMalloc(&D_Position, sizeof(long long) * G->vertexCount * 2));
 
@@ -221,15 +224,15 @@ int BC_edge_centric(graph *G, parameter para)
                 initializeTime += getDeltaTime(startTime);
                 *nextVertex = numBlocks * chunckSize;
                 startTime = wtime();
-                edgeCentric_GPUkernel<<<numBlocks, numThreads>>>(G_src, G_dst, globalCount, hashTable, 0, G->subBeginPosFirst[i].size() - 1, G->partitionNumSrc, i, nextVertex, maxVertexCountInBatch, &D_Position[(b % 2) * G->vertexCount], &D_Position[((b + 1) % 2) * G->vertexCount], maxVertexCountInBatch * partitionNum * b);
+                edgeCentric_GPUkernel<<<numBlocks, numThreads>>>(G_src, G_dst, globalCount, hashTable, 0, 100000, G->partitionNumSrc, i, nextVertex, maxVertexCountInBatch, &D_Position[(b % 2) * G->vertexCount], &D_Position[((b + 1) % 2) * G->vertexCount], maxVertexCountInBatch * partitionNum * b);
                 HRR(cudaDeviceSynchronize());
                 computeTime += getDeltaTime(startTime);
                 // cout << G->vertexCount << endl;
             }
         }
     }
-    cout << numBlocks << ' ' << *globalCount << endl;
-    cout << initializeTime << ' ' << computeTime << " " << transferTime << endl;
+    cout << *globalCount << ' ';
+    cout << initializeTime + computeTime << " " << transferTime << endl;
 
     // cout << initializeTime << ' ' << computeTime * partitionNum * partitionNum << " " << transferTime * partitionNum * partitionNum << endl;
 
@@ -378,8 +381,8 @@ int BC_wedge_centric(graph *G, parameter para)
             }
         }
     }
-    cout << numBlocks << " " << *globalCount << endl;
-    cout << clearTime << ' ' << computeTime << ' ' << transferTime << endl;
+    cout << *globalCount << ' ';
+    cout << clearTime + computeTime << ' ' << transferTime << endl;
 
     return 0;
 }
@@ -388,9 +391,9 @@ int BC_GPU(graph *G, parameter para)
 {
     cudaSetDevice(1);
     // int a, b;
-    // HRR(cudaOccupancyMaxPotentialBlockSize(&a, &b, wedgeCentric_GPUkernel));
+    // HRR(cudaOccupancyMaxPotentialBlockSize(&a, &b, edgeCentric_GPUkernel));
     // cout << a << " " << b << endl;
-    // cout << "numblocks" << initializeCudaPara(1, 1024, edgeCentric_GPUkernel) << endl;
+    cout << "numblocks" << initializeCudaPara(1, 1024, edgeCentric_GPUkernel) << endl;
 
     if (para.varient == edgecentric)
         BC_edge_centric(G, para);

@@ -41,7 +41,8 @@
         "fstream": "cpp",
         "__config": "cpp",
         "initializer_list": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "__threading_support": "cpp"
     },
     "python.formatting.provider": "autopep8"
 }

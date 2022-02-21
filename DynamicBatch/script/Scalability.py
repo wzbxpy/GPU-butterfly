@@ -15,16 +15,38 @@ dataPath = '/home/wzb/bc/dataset/'
 # print(os.listdir(dataPath))
 folds = os.listdir(dataPath)
 print(folds)
-folds = ['trackers']
-processorNums = [1, 2, 4, 8, 16, 32, 56, 112]
+folds = ['twitter', 'filcker', 'livejournal', 'trackers',
+         'orkut', 'bi-twitter', 'bi-sk', 'bi-uk']
+# folds = ['livejournal']
+# processorNums = [1, 2, 4, 8, 16, 32, 56, 112]
+processorNums = [56, 112]
+
 for fold in folds:
     filePath = os.path.join(dataPath, fold)
     if os.path.isdir(filePath):
         script = path+'butterfly.bin '+filePath + \
-            '/ Partition 100 edge-centric 1073741824 112 '
-        for batchSize in range(1, 10):
-            thisScript = script+str(int(batchSize))
+            '/ CPU 100 edge-centric 507374182400 '
+        print(fold)
+        for processorNum in processorNums:
+            thisScript = script+str(int(processorNum))
+            thisScript = thisScript
             # print(thisScript)
+
             f = os.popen(thisScript)
             res = f.readlines()
             print(res)
+
+# processorNums = [1, 2, 4, 8, 16, 32, 64, 108, 216]
+# for fold in folds:
+#     filePath = os.path.join(dataPath, fold)
+#     if os.path.isdir(filePath):
+#         script = path+'butterfly.bin '+filePath + \
+#             '/ GPU 100 edge-centric 40737418240 '
+#         for processorNum in processorNums:
+#             thisScript = script+str(int(processorNum))
+#             thisScript = thisScript
+#             # print(thisScript)
+
+#             f = os.popen(thisScript)
+#             res = f.readlines()
+#             print(res)

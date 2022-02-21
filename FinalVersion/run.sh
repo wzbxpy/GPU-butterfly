@@ -1,6 +1,6 @@
 make -j
 # make clean
-./butterfly.bin /home/wzb/bc/dataset/twitter/ Partition 100 edge-centric 1073741824 216 1
+./butterfly.bin /home/wzb/bc/dataset/twitter/ Partition 100 edge-centric 1073741824 1 1
 
 # make test
 #/root/GPU-butterfly/GPU-code/butterfly.bin ../../dataset/bipartite/twitter/ 0 

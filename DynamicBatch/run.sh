@@ -1,15 +1,14 @@
 # make clean
 make -j
 # make clean
-# ./butterfly.bin /home/wzb/bc/dataset/livejournal/ Partition 100 edge-centric 160000000000 112 1
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-10000/ Partition 100 edge-centric 1000000000 216 1
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-40000/ Partition 100 wedge-centric 1000000000 216 100
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-40000/ Partition 100 edge-centric 1000000000 216 1
+# ./butterfly.bin /home/wzb/bc/dataset/twitter/ CPU 100 edge-centric 10000000000 1
+# ./butterfly.bin /home/wzb/bc/dataset/livejournal/ CPU 100 edge-centric 10000000000 1
+# ./butterfly.bin /home/wzb/bc/dataset/orkut/ CPU 100 edge-centric 10000000000 1
 
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-10000/ Partition 100 wedge-centric 1000000000 216 10
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-10000/ Partition 100 edge-centric 1000000000 216 1
-# ./butterfly.bin /home/wzb/bc/dataset/twitter/ Partition 100 wedge-centric 10000000000 216 1
-# ./butterfly.bin /home/wzb/bc/dataset/twitter/ Partition 100 edge-centric 10000000000 216 1
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/livejournal/ CPU 100 edge-centric 507374182400 56
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/livejournal/ CPU 100 edge-centric 507374182400 112 
+# ./butterfly.bin /home/wzb/bc/dataset/livejournal/ CPU 100 edge-centric 10000000000 1 
+
 
 # ./butterfly.bin /home/wzb/bc/dataset/kron14-2000/ Partition 100 wedge-centric 100000000 108 1
 # ./butterfly.bin /home/wzb/bc/dataset/kron14-2000/ Partition 100 edge-centric 100000000 216 1
@@ -17,39 +16,28 @@ make -j
 
 # ./butterfly.bin /home/wzb/bc/dataset/kron16-10000/ Partition 100 wedge-centric 1000000000 216 10
 # ./butterfly.bin /home/wzb/bc/dataset/kron16-10000/ Partition 100 wedge-centric 1000000000 216 1
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/trackers/ GPU 100 edge-centric 40737418240 216 
+
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/orkut/ GPU 100 edge-centric 40737418240 216 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/orkut/ GPU 100 edge-centric 40737418240 128 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/orkut/ GPU 100 edge-centric 40737418240 108 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/orkut/ GPU 100 edge-centric 40737418240 64 
+
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-32768/ GPU 100 edge-centric 1073741824 216 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-32768/ GPU 100 edge-centric 1073741824 128 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-32768/ GPU 100 edge-centric 1073741824 108 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-32768/ GPU 100 edge-centric 1073741824 64 
+
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/bi-uk/ GPU 100 edge-centric 40737418240 216 
 
 
+# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1073741824 216 30
+# ./butterfly.bin /home/wzb/bc/dataset/kron18-8192/ Partition 100 wedge-centric 1073741824 216 10
+# ./butterfly.bin /home/wzb/bc/dataset/kron20-2048/ Partition 100 wedge-centric 1073741824 216 5
+# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 edge-centric 1073741824 216 1
+# ./butterfly.bin /home/wzb/bc/dataset/kron18-8192/ Partition 100 edge-centric 1073741824 216 1
+# ./butterfly.bin /home/wzb/bc/dataset/kron20-2048/ Partition 100 edge-centric 1073741824 216 1
 
-
-./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1073741824 216 30
-./butterfly.bin /home/wzb/bc/dataset/kron18-8192/ Partition 100 wedge-centric 1073741824 216 10
-./butterfly.bin /home/wzb/bc/dataset/kron20-2048/ Partition 100 wedge-centric 1073741824 216 5
-./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 edge-centric 1073741824 216 1
-./butterfly.bin /home/wzb/bc/dataset/kron18-8192/ Partition 100 edge-centric 1073741824 216 1
-./butterfly.bin /home/wzb/bc/dataset/kron20-2048/ Partition 100 edge-centric 1073741824 216 1
-
-./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1073741824 112 30 CPU
-./butterfly.bin /home/wzb/bc/dataset/kron18-8192/ Partition 100 wedge-centric 1073741824 112 10 CPU
-./butterfly.bin /home/wzb/bc/dataset/kron20-2048/ Partition 100 wedge-centric 1073741824 112 5 CPU
-./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 edge-centric 1073741824 112 1 CPU
-./butterfly.bin /home/wzb/bc/dataset/kron18-8192/ Partition 100 edge-centric 1073741824 112 1 CPU
-./butterfly.bin /home/wzb/bc/dataset/kron20-2048/ Partition 100 edge-centric 1073741824 112 1 CPU
-
-
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1000000000 216 10
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1000000000 216 20
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1000000000 216 30
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1000000000 216 40
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1000000000 216 50
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1000000000 216 60
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1000000000 216 70
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1000000000 216 80
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1000000000 216 90
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 wedge-centric 1000000000 216 100
-# ./butterfly.bin /home/wzb/bc/dataset/kron16-32768/ Partition 100 edge-centric 1000000000 216 1
-
-# ./butterfly.bin /home/wzb/bc/dataset/kron20-2048/ Partition 100 edge-centric 1000000000 112 1
-# ./butterfly.bin /home/wzb/bc/dataset/kron20-2048/ Partition 100 wedge-centric 1000000000 112 1
 
 
 # make test

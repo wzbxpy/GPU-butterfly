@@ -55,7 +55,7 @@ int BC_subgraph_centric(graph *G)
 
     int numThreads = 1024;
     int numBlocks = initializeCudaPara(dev, numThreads, hashCentric);
-    numBlocks = 128;
+    numBlocks = 108;
 
     long long *D_beginPos;
     int *D_edgeList;
@@ -85,8 +85,16 @@ int BC_subgraph_centric(graph *G)
     test<<<1, 1024>>>(globalCount);
     HRR(cudaDeviceSynchronize());
     cout << "here " << *globalCount << endl;
+    startTime = wtime();
+    int *nextVertex;
+    HRR(cudaMallocManaged(&nextVertex, sizeof(int)));
+    *nextVertex = numBlocks;
+    hashBasedButterflyCounting<<<numBlocks, 1024>>>(D_beginPos, D_edgeList, G->uCount, G->vCount, globalCount, perVertexCount, hashTable, 0, G->breakVertex32, nextVertex);
+    HRR(cudaDeviceSynchronize());
+    exectionTime = wtime() - startTime;
+    cout << *globalCount << ' ' << exectionTime << endl;
 
-    if (0)
+    if (1)
     {
 
         long long *D_beginPos_first;

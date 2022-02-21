@@ -177,7 +177,7 @@ void graph::partitionGraphDst(int num)
     }
     for (int n = 0; n < num; n++)
     {
-        auto count = 0;
+        long long count = 0;
         for (int i = 0; i < uCount + vCount; i++)
         {
             subBeginPosSecond[n].push_back(count);
@@ -186,12 +186,6 @@ void graph::partitionGraphDst(int num)
                 subEdgeListSecond[n].push_back(element);
         }
         subBeginPosSecond[n].push_back(count);
-    }
-    int sum = 0;
-    for (int n = 0; n < num; n++)
-    {
-        sum += subEdgeListSecond[n].size();
-        // cout << "id:" << n << " edgenum:" << subEdgeListSecond[n].size() << endl;
     }
 }
 
