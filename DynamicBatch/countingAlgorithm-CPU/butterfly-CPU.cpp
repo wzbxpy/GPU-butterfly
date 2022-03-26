@@ -4,7 +4,7 @@
 #include <cmath>
 #include <atomic>
 #include <thread>
-#include <tbb/tbb_allocator.h>
+#include <memory.h>
 #include "butterfly-CPU.h"
 #include "../wtime.h"
 #include "../graph.h"
