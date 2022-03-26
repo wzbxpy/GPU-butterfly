@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Mon Feb 21 14:59:01 2022
+# Make data base, printed on Fri Mar 25 16:09:17 2022
 
 # Variables
 
@@ -35,9 +35,9 @@ CURDIR := /home/wzb/bc/GPU-butterfly
 # makefile
 SHELL = /bin/sh
 # environment
-VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"5b383b9d184f7cbe3cfd7572cd7df52b.zh-cn","_translationsConfigFile":"/home/wzb/.vscode-server/data/clp/5b383b9d184f7cbe3cfd7572cd7df52b.zh-cn/tcf.json","_cacheRoot":"/home/wzb/.vscode-server/data/clp/5b383b9d184f7cbe3cfd7572cd7df52b.zh-cn","_resolvedLanguagePackCoreLocation":"/home/wzb/.vscode-server/data/clp/5b383b9d184f7cbe3cfd7572cd7df52b.zh-cn/f80445acd5a3dadef24aa209168452a3d97cc326","_corruptedFile":"/home/wzb/.vscode-server/data/clp/5b383b9d184f7cbe3cfd7572cd7df52b.zh-cn/corrupted.info","_languagePackSupport":true}
+VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"2d459c3c1e4312b6770e21efe80cc342.zh-cn","_translationsConfigFile":"/home/wzb/.vscode-server/data/clp/2d459c3c1e4312b6770e21efe80cc342.zh-cn/tcf.json","_cacheRoot":"/home/wzb/.vscode-server/data/clp/2d459c3c1e4312b6770e21efe80cc342.zh-cn","_resolvedLanguagePackCoreLocation":"/home/wzb/.vscode-server/data/clp/2d459c3c1e4312b6770e21efe80cc342.zh-cn/c722ca6c7eed3d7987c0d5c3df5c45f6b15e77d1","_corruptedFile":"/home/wzb/.vscode-server/data/clp/2d459c3c1e4312b6770e21efe80cc342.zh-cn/corrupted.info","_languagePackSupport":true}
 # environment
-_ = /home/wzb/.vscode-server/bin/f80445acd5a3dadef24aa209168452a3d97cc326/node
+_ = /home/wzb/.vscode-server/bin/c722ca6c7eed3d7987c0d5c3df5c45f6b15e77d1/node
 # makefile
 MAKEFILE_LIST := 
 # 'override' directive
@@ -57,9 +57,9 @@ LC_NAME = zh_CN.UTF-8
 # environment
 VSCODE_CWD = /home/wzb
 # environment
-SSH_CONNECTION = 172.16.0.61 59532 172.16.0.71 22
+SSH_CONNECTION = 172.16.0.61 47008 172.16.0.71 22
 # environment
-PATH = /home/wzb/.vscode-server/bin/f80445acd5a3dadef24aa209168452a3d97cc326/bin/remote-cli:/home/wzb/.local/bin:/usr/local/cuda-11.6/bin:/home/wzb/anaconda3/bin:/home/wzb/anaconda3/condabin:/usr/local/cuda-11.2/bin:/home/wzb/.local/bin:/usr/local/cuda-11.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+PATH = /home/wzb/.vscode-server/bin/c722ca6c7eed3d7987c0d5c3df5c45f6b15e77d1/bin/remote-cli:/home/wzb/.local/bin:/usr/local/cuda-11.6/bin:/home/wzb/anaconda3/bin:/home/wzb/anaconda3/condabin:/usr/local/cuda-11.2/bin:/home/wzb/.local/bin:/usr/local/cuda-11.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
 XDG_RUNTIME_DIR = /run/user/1004
 # environment
@@ -81,11 +81,11 @@ VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /home/wzb/bc/GPU-butterfly
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/1004/vscode-ipc-e3572e1e-a1c1-4854-85b5-1cad153dfbff.sock
+VSCODE_IPC_HOOK_CLI = /run/user/1004/vscode-ipc-1e821939-6587-4787-92d5-8b4a6a264e67.sock
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
-VSCODE_AMD_ENTRYPOINT = vs/workbench/services/extensions/node/extensionHostProcess
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
 HOME = /home/wzb
 # environment
@@ -115,7 +115,7 @@ MAKECMDGOALS := all
 # environment
 SHLVL = 3
 # environment
-XDG_SESSION_ID = 946
+XDG_SESSION_ID = 1991
 # environment
 USER = wzb
 # environment
@@ -139,13 +139,13 @@ MAKEFLAGS = pqrR
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_CLIENT = 172.16.0.61 59532 22
+SSH_CLIENT = 172.16.0.61 47008 22
 # environment
 MAIL = /var/mail/wzb
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # environment
-BROWSER = /home/wzb/.vscode-server/bin/f80445acd5a3dadef24aa209168452a3d97cc326/bin/helpers/browser.sh
+BROWSER = /home/wzb/.vscode-server/bin/c722ca6c7eed3d7987c0d5c3df5c45f6b15e77d1/bin/helpers/browser.sh
 # default
 MAKEFILES := 
 # automatic
@@ -189,9 +189,9 @@ _CE_CONDA =
 
 # Directories
 
-# . (device 2050, inode 56610425): 19 files, no impossibilities.
+# . (device 2050, inode 56610425): 20 files, no impossibilities.
 
-# 19 files, no impossibilities in 1 directories.
+# 20 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -241,12 +241,12 @@ GNUmakefile:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 27 / storage = 279 B / avg = 10 B
-# current buf: size = 8162 B / used = 279 B / count = 27 / avg = 10 B
+# strcache buffers: 1 (0) / strings = 28 / storage = 295 B / avg = 10 B
+# current buf: size = 8162 B / used = 295 B / count = 28 / avg = 10 B
 
-# strcache performance: lookups = 30 / hit rate = 10%
+# strcache performance: lookups = 31 / hit rate = 9%
 # hash-table stats:
-# Load=27/8192=0%, Rehash=0, Collisions=1/30=3%
-# Finished Make data base on Mon Feb 21 14:59:01 2022
+# Load=28/8192=0%, Rehash=0, Collisions=1/31=3%
+# Finished Make data base on Fri Mar 25 16:09:17 2022
 
  

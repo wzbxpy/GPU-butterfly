@@ -2,7 +2,10 @@ import sys
 import os
 import numpy as np
 import time
-repeat = 1
+from util import average_of_several_run, clean_disk
+
+
+repeat = 5
 if len(sys.argv) > 1:
     repeat = int(sys.argv[1])
 
@@ -16,28 +19,28 @@ dataPath = '/home/wzb/bc/dataset/'
 folds = os.listdir(dataPath)
 
 print(folds)
-folds = ['twitter', 'filcker', 'livejournal', 'trackers',
-         'orkut']
+folds = ['twitter', 'filcker', 'livejournal', 'delicious', 'trackers',
+         'orkut', 'bi-twitter', 'bi-sk', 'bi-uk']
+folds = ['bi-uk']
 for fold in folds:
+    print(fold)
+    clean_disk()
     filePath = os.path.join(dataPath, fold)
     if os.path.isdir(filePath):
         script = path+'butterfly.bin '+filePath+'/ CPU 100 edge-centric '
         # print(script)
-        for memorySize in np.logspace(25, 35, num=11, base=2):
-            thisScript = script+str(int(memorySize))+" 112"
-            # print(thisScript)
-            f = os.popen(thisScript)
-            res = f.readlines()
-            print(res)
+        for memorySize in np.logspace(28, 38, num=11, base=2):
+            thisScript = script+str(int(memorySize))+" 56"
+            average_of_several_run(thisScript, repeat)
+
 
 for fold in folds:
+    print(fold)
+    clean_disk()
     filePath = os.path.join(dataPath, fold)
     if os.path.isdir(filePath):
         script = path+'butterfly.bin '+filePath+'/ GPU 100 edge-centric '
         # print(script)
-        for memorySize in np.logspace(25, 35, num=11, base=2):
-            thisScript = script+str(int(memorySize))+" 216"
-            # print(thisScript)
-            f = os.popen(thisScript)
-            res = f.readlines()
-            print(res)
+        for memorySize in np.logspace(28, 38, num=11, base=2):
+            thisScript = script+str(int(memorySize))+" 108"
+            average_of_several_run(thisScript, repeat)

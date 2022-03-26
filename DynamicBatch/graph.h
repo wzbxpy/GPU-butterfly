@@ -36,6 +36,13 @@ enum computationPattern
     edgecentric
 };
 
+// enum algorithmName
+// {
+//     EMRC,
+//     sharedHashtable,
+//     BCHM,
+// };
+
 struct parameter
 {
     int partitionNum;

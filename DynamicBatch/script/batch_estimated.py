@@ -37,9 +37,9 @@ for memorySize, folds in Paras:
         if os.path.isdir(filePath):
             script = path+'butterfly.bin '+filePath + \
                 '/ CPU 100 edge-centric '+str(int(memorySize))+' 56 '
-            for batchSize in range(1, 10):
-                thisScript = script+str(int(batchSize))
-                average_of_several_run(thisScript, repeat)
+            average_of_several_run(script, repeat)
+            thisScript = script+str(1)
+            average_of_several_run(thisScript, repeat)
 
 
 for memorySize, folds in Paras:
@@ -51,6 +51,6 @@ for memorySize, folds in Paras:
         if os.path.isdir(filePath):
             script = path+'butterfly.bin '+filePath + \
                 '/ GPU 100 edge-centric '+str(int(memorySize))+' 108 '
-            for batchSize in range(1, 10):
-                thisScript = script+str(int(batchSize))
-                average_of_several_run(thisScript, repeat)
+            average_of_several_run(script, repeat)
+            thisScript = script+str(1)
+            average_of_several_run(thisScript, repeat)

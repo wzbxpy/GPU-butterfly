@@ -9,8 +9,10 @@
 #include "../wtime.h"
 #include "../graph.h"
 #include <stdlib.h>
-#define chunckSize 10
+#include <queue>
+#include <vector>
 using namespace std;
+const int chunckSize = 5;
 
 struct tas_lock
 {
@@ -29,6 +31,14 @@ struct tas_lock
                 __builtin_ia32_pause();
             }
         }
+    }
+    inline bool trylock()
+    {
+        if (!lock_.exchange(true, std::memory_order_acquire))
+        {
+            return true;
+        }
+        return false;
     }
     void unlock() { lock_.store(false, std::memory_order_release); }
 };
@@ -51,15 +61,21 @@ inline void loadNextVertex(int &vertex, atomic<int> *nextVertex, int offsets)
 
 void edgeCentric_kernel(int *hashTable, graph *G_src, graph *G_dst, int threadNum, int threadId, long long *partSum, shared_ptr<atomic<int>> nextVertex, int partitionNumSrc, int partitionNumDst, int vertexOffsets, long long maxVertexCount, long long beginPosition[], long long endPosition[], int dstOffsets)
 {
-    int vertex = threadId * chunckSize;
+    int vertex = dstOffsets / partitionNumDst + threadId * chunckSize;
     long long mySum = 0;
     hashTable += threadId * maxVertexCount;
     for (; vertex < G_src->vertexCount;)
+    // for (; vertex < dstOffsets / partitionNumDst;)
     {
+        int vertexDegree = G_src->beginPos[vertex + 1] - G_src->beginPos[vertex];
+        if (vertexDegree < 2)
+            break;
         // creat hashtable and count
         for (auto oneHopNeighborID = G_src->beginPos[vertex]; oneHopNeighborID < G_src->beginPos[vertex + 1]; oneHopNeighborID += 1)
         {
             int oneHopNeighbor = G_src->edgeList[oneHopNeighborID];
+            if (oneHopNeighbor < dstOffsets)
+                continue;
             int bound = vertex * partitionNumSrc + vertexOffsets < oneHopNeighbor ? vertex * partitionNumSrc + vertexOffsets : oneHopNeighbor;
             for (auto twoHopNeighborID = beginPosition[oneHopNeighbor]; twoHopNeighborID < endPosition[oneHopNeighbor]; twoHopNeighborID += 1)
             {
@@ -73,8 +89,8 @@ void edgeCentric_kernel(int *hashTable, graph *G_src, graph *G_dst, int threadNu
             }
         }
         // clean hashtable
-        int vertexDegree = G_src->beginPos[vertex + 1] - G_src->beginPos[vertex];
-        if (vertexDegree * vertexDegree > G_dst->vertexCount) // choose the lower costs method
+        if (G_dst->edgeCount / G_dst->vertexCount > G_dst->vertexCount / vertexDegree) // choose the lower costs method
+        // if (0)
         {
             memset(hashTable, 0, sizeof(int) * maxVertexCount);
         }
@@ -83,6 +99,8 @@ void edgeCentric_kernel(int *hashTable, graph *G_src, graph *G_dst, int threadNu
             for (auto oneHopNeighborID = G_src->beginPos[vertex]; oneHopNeighborID < G_src->beginPos[vertex + 1]; oneHopNeighborID += 1)
             {
                 int oneHopNeighbor = G_src->edgeList[oneHopNeighborID];
+                if (oneHopNeighbor < dstOffsets)
+                    continue;
                 int bound = vertex * partitionNumSrc + vertexOffsets < oneHopNeighbor ? vertex * partitionNumSrc + vertexOffsets : oneHopNeighbor;
                 for (auto twoHopNeighborID = beginPosition[oneHopNeighbor]; twoHopNeighborID < endPosition[oneHopNeighbor]; twoHopNeighborID += 1)
                 {
@@ -97,7 +115,8 @@ void edgeCentric_kernel(int *hashTable, graph *G_src, graph *G_dst, int threadNu
             }
         }
         // load next vertex
-        loadNextVertex(vertex, nextVertex.get(), 0);
+        // vertex = (vertex + 1) % chunckSize != 0 ? vertex + 1 : nextVertex->fetch_add(chunckSize);
+        loadNextVertex(vertex, nextVertex.get(), dstOffsets / partitionNumDst);
         // vertex += threadNum;
     }
     *partSum = mySum;
@@ -105,10 +124,10 @@ void edgeCentric_kernel(int *hashTable, graph *G_src, graph *G_dst, int threadNu
 
 // Partition the neighbor list into several parts. Thus the hash tabel can be fit into the memory.
 // Given the partition id, i.e. boundary of dst id, obtaining the begin and end position of each neighborlist
-void initializeBeginPosition_kernel(long long beginPosition[], long long endPosition[], graph *G, int threadNum, int threadId, int boundary, bool isFirst, bool isLast)
+void initializeBeginPosition_kernel(long long beginPosition[], long long endPosition[], graph *G, int threadNum, int threadId, int boundary, bool isFirst, bool isLast, int startVertex)
 {
-    int range = G->vertexCount / threadNum;
-    int start = threadId * range;
+    int range = (G->vertexCount - startVertex) / threadNum;
+    int start = startVertex + threadId * range;
     int end = start + range;
     if (threadId + 1 == threadNum)
         end = G->vertexCount;
@@ -127,8 +146,9 @@ void initializeBeginPosition_kernel(long long beginPosition[], long long endPosi
         for (int vertex = start; vertex < end; vertex++)
         {
             long long pos;
+            int bound = boundary < vertex ? boundary : vertex;
             for (pos = beginPosition[vertex]; pos < G->beginPos[vertex + 1]; pos++)
-                if (G->edgeList[pos] >= boundary)
+                if (G->edgeList[pos] >= bound)
                     break;
             endPosition[vertex] = pos;
         }
@@ -169,13 +189,13 @@ void edgeCentric(string path, parameter para)
             for (int b = 0; b < para.batchNum; b++)
             {
                 startTime = wtime();
-                *nextVertex = threadNum * chunckSize;
                 // initilize start position of this batch
                 for (int threadId = 0; threadId < threadNum; threadId++)
-                    threads[threadId] = thread(initializeBeginPosition_kernel, &Position[(b % 2) * vertexCount], &Position[((b + 1) % 2) * vertexCount], G_dst, threadNum, threadId, maxVertexCountInBatch * partitionNumDst * (b + 1), b == 0, b == para.batchNum - 1);
+                    threads[threadId] = thread(initializeBeginPosition_kernel, &Position[(b % 2) * vertexCount], &Position[((b + 1) % 2) * vertexCount], G_dst, threadNum, threadId, maxVertexCountInBatch * partitionNumDst * (b + 1), b == 0, b == para.batchNum - 1, maxVertexCountInBatch * partitionNumDst * b);
                 for (auto &t : threads)
                     t.join();
                 initializeTime += getDeltaTime(startTime);
+                *nextVertex = threadNum * chunckSize + maxVertexCountInBatch * b;
                 // count the butterfies in each batch
                 for (int threadId = 0; threadId < threadNum; threadId++)
                     threads[threadId] = thread(edgeCentric_kernel, hashTable.get(), G_src, G_dst, threadNum, threadId, &partSum[threadId], nextVertex, partitionNumSrc, partitionNumDst, i, maxVertexCountInBatch, &Position[(b % 2) * vertexCount], &Position[((b + 1) % 2) * vertexCount], maxVertexCountInBatch * partitionNumDst * b);
@@ -342,26 +362,42 @@ void wedgeCentric_kernel_withoutAtomic(shared_ptr<int[]> hashTable, long long be
     long long mySum = 0;
     long long beginPosFirstOffset = beginPosFirst[previousVertex];
     long long beginPosSecondOffset = beginPosSecond[previousVertex];
+    int flag = edgeListFirst[0] % partitionNum > edgeListSecond[0] % partitionNum;
+    queue<int> Q;
+    vector<int> P;
     for (; vertex < lastVertex;)
     {
         for (auto firstNeighborID = beginPosFirst[vertex]; firstNeighborID < beginPosFirst[vertex + 1]; firstNeighborID += 1)
+            Q.push(edgeListFirst[firstNeighborID - beginPosFirstOffset] / partitionNum);
+        for (auto secondNeighborID = beginPosSecond[vertex]; secondNeighborID < beginPosSecond[vertex + 1]; secondNeighborID += 1)
         {
-            long long firstNeighbor = edgeListFirst[firstNeighborID - beginPosFirstOffset];
-            int bound = vertex < firstNeighbor ? vertex : firstNeighbor;
-            firstNeighbor = (firstNeighbor / partitionNum) * maxVertexCount;
-            lock[firstNeighbor / maxVertexCount].lock();
-            for (auto secondNeighborID = beginPosSecond[vertex]; secondNeighborID < beginPosSecond[vertex + 1]; secondNeighborID += 1)
-            {
-                int secondNeighbor = edgeListSecond[secondNeighborID - beginPosSecondOffset];
-                if (secondNeighbor >= bound)
-                    break;
-                secondNeighbor = firstNeighbor + secondNeighbor / partitionNum;
-                mySum += hashTable[secondNeighbor];
-                hashTable[secondNeighbor]++;
-                // mySum += firstNeighbor + (secondNeighbor / partitionNum);
-            }
-            lock[firstNeighbor / maxVertexCount].unlock();
+            int secondNeighbor = edgeListSecond[secondNeighborID - beginPosSecondOffset];
+            if (secondNeighbor >= vertex)
+                break;
+            P.push_back(secondNeighbor / partitionNum);
         }
+        while (!Q.empty())
+        {
+            int firstNeighbor = Q.front();
+            Q.pop();
+            if (lock[firstNeighbor].trylock())
+            {
+                long long offset = firstNeighbor * maxVertexCount;
+                int bound = firstNeighbor + flag;
+                for (auto secondNeighbor : P)
+                {
+                    if (secondNeighbor >= bound)
+                        break;
+                    mySum += hashTable[offset + secondNeighbor]++;
+                }
+                lock[firstNeighbor].unlock();
+            }
+            else
+            {
+                Q.push(firstNeighbor);
+            }
+        }
+        P.clear();
         // load next vertex
         loadNextVertex(vertex, nextVertex.get(), previousVertex);
     }
@@ -463,52 +499,74 @@ void sharedHashTable_kernel(shared_ptr<atomic<int>[]> hashTable, graph *G, int t
 {
     // long long partSum = 0;
     int vertexCount = G->vertexCount;
-    long long *beginPosFirst = G->beginPos;  // LL[vertexCount + 1];
-    int *edgeListFirst = G->edgeList;        // int[G->edgeCount];
-    long long *beginPosSecond = G->beginPos; // LL[vertexCount + 1];
-    int *edgeListSecond = G->edgeList;       // int[G->edgeCount];
-    int count = 0;
+    long long *beginPos = G->beginPos; // LL[vertexCount + 1];
+    int *edgeList = G->edgeList;       // int[G->edgeCount];
+    long long mySum = 0;
 
-    int vertexDegree = beginPosFirst[vertex + 1] - beginPosFirst[vertex];
-    for (auto oneHopNeighborID = beginPosFirst[vertex]; oneHopNeighborID < beginPosFirst[vertex + 1]; oneHopNeighborID += 1)
+    for (auto oneHopNeighborID = beginPos[vertex] + threadId; oneHopNeighborID < beginPos[vertex + 1]; oneHopNeighborID += threadNum)
     {
-        int oneHopNeighbor = edgeListFirst[oneHopNeighborID];
+        int oneHopNeighbor = edgeList[oneHopNeighborID];
         int bound = vertex < oneHopNeighbor ? vertex : oneHopNeighbor;
-        for (auto twoHopNeighborID = beginPosSecond[oneHopNeighbor]; twoHopNeighborID < beginPosSecond[oneHopNeighbor + 1]; twoHopNeighborID += 1)
+        for (auto twoHopNeighborID = beginPos[oneHopNeighbor]; twoHopNeighborID < beginPos[oneHopNeighbor + 1]; twoHopNeighborID += 1)
         {
-            int twoHopNeighbor = edgeListSecond[twoHopNeighborID];
+            int twoHopNeighbor = edgeList[twoHopNeighborID];
             if (twoHopNeighbor >= bound)
                 break;
-            *partSum += hashTable[threadId * vertexCount + twoHopNeighbor].fetch_add(1);
-            // hashTable[threadId * vertexCount + twoHopNeighbor]++;
+            mySum += hashTable[twoHopNeighbor].fetch_add(1);
         }
     }
-    if (vertexDegree * vertexDegree > vertexCount) // choose the lower costs method
+    *partSum += mySum;
+}
+
+void cleanSharedHashTable_kernel(shared_ptr<atomic<int>[]> hashTable, graph *G, int threadNum, int threadId, long long *partSum, int vertex)
+{
+    // long long partSum = 0;
+    int vertexCount = G->vertexCount;
+    long long *beginPos = G->beginPos; // LL[vertexCount + 1];
+    int *edgeList = G->edgeList;       // int[G->edgeCount];
+    long long mySum = 0;
+
+    for (auto oneHopNeighborID = beginPos[vertex] + threadId; oneHopNeighborID < beginPos[vertex + 1]; oneHopNeighborID += threadNum)
     {
-        for (int i = threadId * vertexCount; i < (threadId + 1) * vertexCount; i++)
+        int oneHopNeighbor = edgeList[oneHopNeighborID];
+        int bound = vertex < oneHopNeighbor ? vertex : oneHopNeighbor;
+        for (auto twoHopNeighborID = beginPos[oneHopNeighbor]; twoHopNeighborID < beginPos[oneHopNeighbor + 1]; twoHopNeighborID += 1)
         {
-            hashTable[i] = 0;
+            int twoHopNeighbor = edgeList[twoHopNeighborID];
+            if (twoHopNeighbor >= bound)
+                break;
+            hashTable[twoHopNeighbor] = 0;
         }
     }
-    else
+}
+
+void sharedHashTable_kernel_withoutScheduling(shared_ptr<atomic<int>[]> hashTable, graph *G, int threadNum, int threadId, long long *partSum)
+{
+    // long long partSum = 0;
+    int vertexCount = G->vertexCount;
+    long long *beginPos = G->beginPos; // LL[vertexCount + 1];
+    int *edgeList = G->edgeList;       // int[G->edgeCount];
+    long long mySum = 0;
+
+    for (int vertex = 0; vertex < G->vertexCount; vertex++)
     {
-        for (auto oneHopNeighborID = beginPosFirst[vertex]; oneHopNeighborID < beginPosFirst[vertex + 1]; oneHopNeighborID += 1)
+        if (G->beginPos[vertex + 1] - G->beginPos[vertex] < 2)
+            break;
+        for (auto oneHopNeighborID = beginPos[vertex] + threadId; oneHopNeighborID < beginPos[vertex + 1]; oneHopNeighborID += threadNum)
         {
-            int oneHopNeighbor = edgeListFirst[oneHopNeighborID];
+            int oneHopNeighbor = edgeList[oneHopNeighborID];
             int bound = vertex < oneHopNeighbor ? vertex : oneHopNeighbor;
-            for (auto twoHopNeighborID = beginPosSecond[oneHopNeighbor]; twoHopNeighborID < beginPosSecond[oneHopNeighbor + 1]; twoHopNeighborID += 1)
+            for (auto twoHopNeighborID = beginPos[oneHopNeighbor]; twoHopNeighborID < beginPos[oneHopNeighbor + 1]; twoHopNeighborID += 1)
             {
-                int twoHopNeighbor = edgeListSecond[twoHopNeighborID];
+                int twoHopNeighbor = edgeList[twoHopNeighborID];
                 if (twoHopNeighbor >= bound)
                     break;
-                hashTable[threadId * vertexCount + twoHopNeighbor] = 0;
+                mySum += hashTable[twoHopNeighbor].fetch_add(1);
             }
         }
     }
-    // cout << vertex << endl;
-    // vertex += threadNum;
+    *partSum += mySum;
 }
-
 void sharedHashTable(graph *G, int threadNum)
 {
     int vertexCount = G->vertexCount;
@@ -519,21 +577,39 @@ void sharedHashTable(graph *G, int threadNum)
     thread threads[threadNum];
     double startTime = wtime();
     long long ans = 0;
-    for (int vertex = 0; vertex < G->vertexCount; vertex++)
+    cout << threadNum << endl;
+    // for (int vertex = 0; vertex < G->vertexCount; vertex++)
+    // {
+    //     if (G->beginPos[vertex + 1] - G->beginPos[vertex] < 2)
+    //         break;
+    //     for (int threadId = 0; threadId < threadNum; threadId++)
+    //     {
+    //         threads[threadId] = thread(sharedHashTable_kernel, hashTable, G, threadNum, threadId, &partSum[threadId], vertex);
+    //     }
+    //     for (auto &t : threads)
+    //     {
+    //         t.join();
+    //     }
+    //     for (int threadId = 0; threadId < threadNum; threadId++)
+    //     {
+    //         threads[threadId] = thread(cleanSharedHashTable_kernel, hashTable, G, threadNum, threadId, &partSum[threadId], vertex);
+    //     }
+    //     for (auto &t : threads)
+    //     {
+    //         t.join();
+    //     }
+    // }
+    for (int threadId = 0; threadId < threadNum; threadId++)
     {
-        for (int threadId = 0; threadId < threadNum; threadId++)
-        {
-            threads[threadId] = thread(sharedHashTable_kernel, hashTable, G, threadNum, threadId, &partSum[threadId], vertex);
-        }
-        for (auto &t : threads)
-        {
-            t.join();
-        }
-        for (int i = 0; i < threadNum; i++)
-        {
-            ans += partSum[i];
-            partSum[i] = 0;
-        }
+        threads[threadId] = thread(sharedHashTable_kernel_withoutScheduling, hashTable, G, threadNum, threadId, &partSum[threadId]);
+    }
+    for (auto &t : threads)
+    {
+        t.join();
+    }
+    for (int i = 0; i < threadNum; i++)
+    {
+        ans += partSum[i];
     }
     cout << ans << " " << wtime() - startTime << endl;
 }

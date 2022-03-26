@@ -1,12 +1,57 @@
+cd /home/wzb/bc/GPU-butterfly/DynamicBatch/
 # make clean
 make -j
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/delicious/ CPU 100 edge-centric 507374182400 112
+
+
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/twitter/ sharedHashtable 100 edge-centric 1073741824 56
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/filcker/ sharedHashtable 100 edge-centric 1073741824 56
+
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/GPU-butterfly/preprocess/testdata/ CPU 100 edge-centric 1073741824 1 1
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/twitter/ CPU 100 edge-centric 1073741824 1 1
+
+
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/twitter/ EMRC 100 wedge-centric 1073741824 1 1
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/livejournal/ EMRC 100 wedge-centric 1073741824 1 1
+
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/twitter/ CPU 100 edge-centric 19173961 1
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/filcker/ CPU 100 edge-centric 19173961 1
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/bi-twitter/ CPU 100 edge-centric 507374182400 112
+
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/delicious/ CPU 100 edge-centric 4294967296 1 1
+
+
+
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/orkut/ GPU 100 edge-centric 40737418240 108
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/orkut/ GPU 100 edge-centric 40737418240 216
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/orkut/ GPU 100 edge-centric 40737418240 500
+
 # make clean
 # ./butterfly.bin /home/wzb/bc/dataset/twitter/ CPU 100 edge-centric 10000000000 1
 # ./butterfly.bin /home/wzb/bc/dataset/livejournal/ CPU 100 edge-centric 10000000000 1
 # ./butterfly.bin /home/wzb/bc/dataset/orkut/ CPU 100 edge-centric 10000000000 1
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/bi-uk/ CPU 100 edge-centric 507374182400 56
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-32768/ CPU 100 wedge-centric 1073741824 56 30 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron18-8192/ CPU 100 wedge-centric 1073741824 56 10 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron20-2048/ CPU 100 wedge-centric 1073741824 56 5 
 
-/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/livejournal/ CPU 100 edge-centric 507374182400 56
-/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/livejournal/ CPU 100 edge-centric 507374182400 112 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-32768/ CPU 100 wedge-centric 1073741824 56 30 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-32768/ CPU 100 wedge-centric 1073741824 224 30 
+
+
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/bi-sk/ CPU 100 edge-centric 507374182400 1 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/twitter/ GPU 100 edge-centric 507374182400 108 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/twitter/ GPU 100 edge-centric 507374182400 216 
+
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/bi-uk/ GPU 100 edge-centric 40737418240 64 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/bi-uk/ GPU 100 edge-centric 40737418240 108 
+
+# ncu -o profile1 -f /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/orkut/ GPU 100 edge-centric 507374182400 108 
+# ncu -o profile2 -f /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/orkut/ GPU 100 edge-centric 507374182400 216 
+
+
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/bi-uk/ CPU 100 edge-centric 507374182400 56
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/livejournal/ CPU 100 edge-centric 507374182400 112 
 # ./butterfly.bin /home/wzb/bc/dataset/livejournal/ CPU 100 edge-centric 10000000000 1 
 
 

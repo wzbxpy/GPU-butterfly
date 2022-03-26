@@ -8,7 +8,7 @@
 #include <atomic>
 #include <thread>
 #include <cmath>
-const double alpha = 0.5;
+const double alpha = 0.2;
 
 using namespace std;
 
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
                 {
                     double memoryForWedges = (para.memorySize - (double)G->vertexCount * sizeof(long long) * 2) / sizeof(int);
                     double edgeSize = G->edgeCount * 2 / para.batchNum;
-                    para.partitionNum = ceil(G->vertexCount / sqrt(memoryForWedges)) + ceil(edgeSize / memoryForWedges);
+                    para.partitionNum = ceil(G->vertexCount / sqrt(memoryForWedges) + edgeSize / memoryForWedges);
                     cout << "wc partition num: " << para.partitionNum << ' ';
                     para.varient = wedgecentric;
                 }
@@ -91,7 +91,8 @@ int main(int argc, char *argv[])
 
                     // cout << "memory consumption: " << (double)G->vertexCount * sizeof(long long) * 3 << ' ' << G->edgeCount * 2 * sizeof(int) << ' ' << ((long long)G->vertexCount) / para.batchNum * para.processorNum * sizeof(int) << endl;
                     cout << "ec partition num: " << para.partitionNum << ' ';
-                    if (para.partitionNum > 40)
+                    cout << para.batchNum << endl;
+                    if (para.partitionNum > 40 || para.partitionNum < 1)
                     {
                         cout << endl;
                         return 0;
@@ -126,6 +127,8 @@ int main(int argc, char *argv[])
         BC_CPU(path, G, para, false, false);
     if (Platform == "EMRC")
         BC_CPU(path, G, para, false, true);
+    if (Platform == "sharedHashtable")
+        BC_CPU(path, G, para, true, false);
 
     // CPU benchmark
     // vector<int> threadsNumList = {1, 2, 4, 8, 16, 32, 56, 112};

@@ -2,7 +2,9 @@ import sys
 import os
 import numpy as np
 import time
-repeat = 1
+from util import average_of_several_run
+
+repeat = 5
 if len(sys.argv) > 1:
     repeat = int(sys.argv[1])
 
@@ -15,11 +17,11 @@ dataPath = '/home/wzb/bc/dataset/'
 # print(os.listdir(dataPath))
 folds = os.listdir(dataPath)
 print(folds)
-folds = ['twitter', 'filcker', 'livejournal', 'trackers',
+folds = ['twitter', 'filcker', 'livejournal', 'delicious', 'trackers',
          'orkut', 'bi-twitter', 'bi-sk', 'bi-uk']
-# folds = ['livejournal']
-# processorNums = [1, 2, 4, 8, 16, 32, 56, 112]
-processorNums = [56, 112]
+# folds = ['twitter']
+processorNums = [1, 2, 4, 8, 16, 32, 56, 112]
+# processorNums = [56, 112]
 
 for fold in folds:
     filePath = os.path.join(dataPath, fold)
@@ -29,24 +31,18 @@ for fold in folds:
         print(fold)
         for processorNum in processorNums:
             thisScript = script+str(int(processorNum))
-            thisScript = thisScript
-            # print(thisScript)
+            average_of_several_run(thisScript, repeat)
 
-            f = os.popen(thisScript)
-            res = f.readlines()
-            print(res)
 
-# processorNums = [1, 2, 4, 8, 16, 32, 64, 108, 216]
-# for fold in folds:
-#     filePath = os.path.join(dataPath, fold)
-#     if os.path.isdir(filePath):
-#         script = path+'butterfly.bin '+filePath + \
-#             '/ GPU 100 edge-centric 40737418240 '
-#         for processorNum in processorNums:
-#             thisScript = script+str(int(processorNum))
-#             thisScript = thisScript
-#             # print(thisScript)
+processorNums = [1, 2, 4, 8, 16, 32, 64, 108, 216]
+# processorNums = [108, 216]
 
-#             f = os.popen(thisScript)
-#             res = f.readlines()
-#             print(res)
+for fold in folds:
+    filePath = os.path.join(dataPath, fold)
+    if os.path.isdir(filePath):
+        print(fold)
+        script = path+'butterfly.bin '+filePath + \
+            '/ GPU 100 edge-centric 40737418240 '
+        for processorNum in processorNums:
+            thisScript = script+str(int(processorNum))
+            average_of_several_run(thisScript, repeat)
