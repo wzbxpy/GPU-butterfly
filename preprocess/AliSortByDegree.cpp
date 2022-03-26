@@ -57,7 +57,7 @@ void printb(shared_ptr<vector<int>[]> b)
         cout << endl;
     }
 }
-int find(unordered_map<int, int> &map, int key)
+int find(unordered_map<long long, int> &map, long long key)
 {
     if (map.find(key) != map.end())
     {
@@ -74,22 +74,21 @@ void loadGeneratedGraph(string path)
 {
     long long vertexpower, degree;
     vector<vector<int>> b;
-    unordered_map<int, int> left, right;
+    unordered_map<long long, int> left, right;
 
     fstream filename(path + "filenames.txt", ios::in);
     string name;
     while (filename >> name)
     {
         fstream graphFile(path + name, ios::in);
-        int u, v;
+        long long u, v;
         string s;
         while (getline(graphFile, s, ','))
         {
-            u = stoi(s);
+            u = stoll(s);
             getline(graphFile, s);
-            v = stoi(s);
+            v = stoll(s);
             u = find(left, u);
-            cout << u << endl;
             v = find(right, v);
             if (b.size() <= u)
                 b.resize(u + 1);
