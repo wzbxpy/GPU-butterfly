@@ -1,7 +1,7 @@
 exe=butterfly.bin
 N=1
 cc= "$(shell which g++)"
-commflags=-fcilkplus -O3 -W -Wall -Wno-unused-function -Wno-unused-parameter 
+commflags= -pthread -O3 -W -Wall -Wno-unused-function -Wno-unused-parameter 
 cuflags= --compiler-options -Wall --gpu-architecture=compute_80 --gpu-code=sm_80 -m64 -c  -O3  # --resource-usage 
 
 .SILENT: cucc
