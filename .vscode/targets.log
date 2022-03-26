@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Mar 25 16:09:17 2022
+# Make data base, printed on Sat Mar 26 17:00:57 2022
 
 # Variables
 
@@ -57,7 +57,7 @@ LC_NAME = zh_CN.UTF-8
 # environment
 VSCODE_CWD = /home/wzb
 # environment
-SSH_CONNECTION = 172.16.0.61 47008 172.16.0.71 22
+SSH_CONNECTION = 172.16.0.61 53622 172.16.0.71 22
 # environment
 PATH = /home/wzb/.vscode-server/bin/c722ca6c7eed3d7987c0d5c3df5c45f6b15e77d1/bin/remote-cli:/home/wzb/.local/bin:/usr/local/cuda-11.6/bin:/home/wzb/anaconda3/bin:/home/wzb/anaconda3/condabin:/usr/local/cuda-11.2/bin:/home/wzb/.local/bin:/usr/local/cuda-11.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
@@ -81,7 +81,7 @@ VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /home/wzb/bc/GPU-butterfly
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/1004/vscode-ipc-1e821939-6587-4787-92d5-8b4a6a264e67.sock
+VSCODE_IPC_HOOK_CLI = /run/user/1004/vscode-ipc-93d2c6f6-4d29-4e5a-af37-06d936934717.sock
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -115,7 +115,7 @@ MAKECMDGOALS := all
 # environment
 SHLVL = 3
 # environment
-XDG_SESSION_ID = 1991
+XDG_SESSION_ID = 2025
 # environment
 USER = wzb
 # environment
@@ -139,7 +139,7 @@ MAKEFLAGS = pqrR
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_CLIENT = 172.16.0.61 47008 22
+SSH_CLIENT = 172.16.0.61 53622 22
 # environment
 MAIL = /var/mail/wzb
 # automatic
@@ -247,6 +247,6 @@ GNUmakefile:
 # strcache performance: lookups = 31 / hit rate = 9%
 # hash-table stats:
 # Load=28/8192=0%, Rehash=0, Collisions=1/31=3%
-# Finished Make data base on Fri Mar 25 16:09:17 2022
+# Finished Make data base on Sat Mar 26 17:00:57 2022
 
  

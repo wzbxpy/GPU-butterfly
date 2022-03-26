@@ -1,6 +1,8 @@
 #include <iostream>
 #include "graph.h"
+#ifdef GPU
 #include "countingAlgorithm-GPU/butterfly-GPU.h"
+#endif
 #include "countingAlgorithm-CPU/butterfly-CPU.h"
 #include <string>
 #include <cstdlib>
@@ -121,8 +123,10 @@ int main(int argc, char *argv[])
             return 0;
         }
     }
+#ifdef GPU
     if (Platform == "GPU")
         BC_GPU(G, para);
+#endif
     if (Platform == "CPU")
         BC_CPU(path, G, para, false, false);
     if (Platform == "EMRC")
