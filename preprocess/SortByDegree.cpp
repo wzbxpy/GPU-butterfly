@@ -57,6 +57,66 @@ void printb(shared_ptr<vector<int>[]> b)
     }
 }
 
+void loadEdgeList(string path)
+{
+    fstream edgeListFile(path, ios::in);
+    long long vertexpower, degree;
+    // edgeListFile >> vertexpower >> degree;
+    // vertexCount = powl(2, vertexpower);
+    // edgeCount = degree * vertexCount;
+    edgeListFile >> vertexCount >> vertexCount >> edgeCount;
+    cout << vertexCount << " " << edgeCount << endl;
+    path = path.substr(0, path.rfind('/'));
+
+    shared_ptr<vector<int>[]> b(new vector<int>[vertexCount]);
+    for (int i = 0; i < edgeCount; i++)
+    {
+        int u, v;
+        edgeListFile >> u >> v;
+        u--;
+        v--;
+        // cout << u << " " << v << endl;
+        b[u].push_back(v);
+        b[v].push_back(u);
+    }
+
+    removeDuplicatedEdgeAndSelfLoop(b);
+    struct node *idDegree = new struct node[vertexCount];
+    for (int i = 0; i < vertexCount; i++)
+    {
+        idDegree[i].id = i;
+        idDegree[i].degree = b[i].size();
+    }
+    sort(idDegree, idDegree + vertexCount, cmp_degree);
+    unique_ptr<int[]> newid(new int[vertexCount]);
+    for (int i = 0; i < vertexCount; i++)
+    {
+        newid[idDegree[i].id] = i;
+    }
+    for (int i = 0; i < vertexCount; i++)
+    {
+        for (auto &dst : b[i])
+            dst = newid[dst];
+        sort(b[i].begin(), b[i].end());
+    }
+    ofstream beginFile(path + "/begin.bin", ios::out | ios::binary);
+    ofstream adjFile(path + "/adj.bin", ios::out | ios::binary);
+    long long sum = 0;
+    for (int i = 0; i < vertexCount; i++)
+    {
+        int vertex = idDegree[i].id;
+        beginFile.write((char *)&sum, sizeof(long long));
+        sum += idDegree[i].degree;
+        adjFile.write((char *)&b[vertex][0], sizeof(int) * idDegree[i].degree);
+    }
+    beginFile.write((char *)&sum, sizeof(long long));
+    ofstream propertiesFile(path + "/properties.txt", ios::out);
+    propertiesFile << 0 << ' ' << vertexCount << ' ' << sum << endl;
+    beginFile.close();
+    adjFile.close();
+    propertiesFile.close();
+}
+
 void loadGeneratedGraph(string path)
 {
     fstream propertiesInFile(path + "/properties1.txt", ios::in);
@@ -172,7 +232,7 @@ void storeCSR(string path)
         a[nnn[i].id] = i;
     }
 
-    //give each edge new id
+    // give each edge new id
     for (int i = 0; i < edgeCount; i++)
         edgeList[i] = a[edgeList[i]];
     ofstream beginFile(path + "/begin.bin", ios::out | ios::binary);
@@ -211,8 +271,10 @@ int main(int argc, char *argv[])
     }
     else
     {
-        loadWangkaiGraph(path);
-        sortbydegree();
-        storeCSR(path + "sorted");
+        cout << "here" << endl;
+        // loadWangkaiGraph(path);
+        // sortbydegree();
+        // storeCSR(path + "sorted");
+        loadEdgeList(path);
     }
 }

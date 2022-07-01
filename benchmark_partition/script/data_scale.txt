@@ -1,0 +1,162 @@
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-8/ CPU 100 edge-centric 909904 56
+[1.10000000e+01 8.00000000e+00 1.17540623e+09 1.37849000e+00 1.36809000e+00 2.57850000e-02]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-64/ CPU 100 edge-centric 6119476 56
+[1.20000000e+01 2.00000000e+00 3.23163873e+11 4.37667000e-01 9.41244000e-01 1.11992000e-01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-512/ CPU 100 edge-centric 44367385 56
+[1.10000000e+01 1.00000000e+00 5.02212484e+13 1.92389000e-01 3.75470000e+00 5.93707000e-01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-4096/ CPU 100 wedge-centric 332251139 56
+[9.00000000e+00 1.00000000e+01 6.47761414e+15 2.73993000e-01 6.17500000e+01 5.51674000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-32768/ CPU 100 wedge-centric 2277575243 56
+[4.00000000e+00 1.00000000e+01 7.13111685e+17 6.37999000e-01 1.39084000e+03 2.31913000e+01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-8/ CPU 100 edge-centric 909904 56
+[1.10000000e+01 8.00000000e+00 1.17540623e+09 1.36296000e+00 1.36498000e+00 3.37880000e-02]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron19-8/ CPU 100 edge-centric 7400094 56
+[1.10000000e+01 8.00000000e+00 2.70535034e+10 1.42917000e+00 1.60393000e+00 1.90158000e-01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron22-8/ CPU 100 edge-centric 59748025 56
+[1.10000000e+01 8.00000000e+00 5.99812571e+11 1.81304000e+00 3.96816000e+00 1.50364000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron25-8/ CPU 100 edge-centric 480300220 56
+[1.10000000e+01 8.00000000e+00 1.29107053e+13 7.55086000e+00 4.38591000e+01 1.09983000e+01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron28-8/ CPU 100 edge-centric 3852729241 56
+[1.10000000e+01 8.00000000e+00 2.77111671e+14 6.39038000e+01 6.27958000e+02 9.81433000e+01]
+[2.7723649999999997, 1.490903, 4.540796, 67.540733, 1414.669299, 2.761728, 3.223258, 7.28484, 62.40826, 790.0051]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-8/ CPU 100 edge-centric 2274760 56
+[5.00000000e+00 5.00000000e+00 1.17540623e+09 1.76826000e-01 1.84966000e-01 8.42700000e-03]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-64/ CPU 100 edge-centric 15298692 56
+[5.00000000e+00 1.00000000e+00 3.23163873e+11 3.82655000e-02 3.35496000e-01 4.50450000e-02]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-512/ CPU 100 edge-centric 110918464 56
+[5.00000000e+00 1.00000000e+00 5.02212484e+13 4.11561000e-02 2.67757000e+00 3.12251000e-01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-4096/ CPU 100 edge-centric 830627848 56
+[5.00000000e+00 1.00000000e+00 6.47761414e+15 4.35488000e-02 5.95887000e+01 2.12396000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-32768/ CPU 100 wedge-centric 5693938108 56
+[3.0000000e+00 4.0000000e+00 3.4103345e+17 5.1808600e-01 6.1288000e+02 2.3289000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-8/ CPU 100 edge-centric 2274760 56
+[5.00000000e+00 5.00000000e+00 1.17540623e+09 1.76470000e-01 1.86024000e-01 8.32400000e-03]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron19-8/ CPU 100 edge-centric 18500236 56
+[5.00000000e+00 5.00000000e+00 2.70535034e+10 1.89029000e-01 3.57904000e-01 7.07060000e-02]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron22-8/ CPU 100 edge-centric 149370064 56
+[5.00000000e+00 5.00000000e+00 5.99812571e+11 2.99121000e-01 2.40513000e+00 4.59654000e-01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron25-8/ CPU 100 edge-centric 1200750552 56
+[5.00000000e+00 5.00000000e+00 1.29107053e+13 1.75536000e+00 3.67923000e+01 4.51616000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron28-8/ CPU 100 edge-centric 9631823104 56
+[5.00000000e+00 5.00000000e+00 2.77111671e+14 1.41549000e+01 4.70378000e+02 3.40291000e+01]
+[0.370219, 0.4188065, 3.0309770999999994, 61.7562088, 615.726986, 0.370818, 0.617639, 3.163905, 43.06382, 518.562]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-8/ CPU 100 edge-centric 9099040 56
+[2.00000000e+00 2.00000000e+00 1.17540623e+09 1.19698000e-02 1.96443000e-02 4.54800000e-03]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-64/ CPU 100 edge-centric 61194768 56
+[2.00000000e+00 1.00000000e+00 3.23163873e+11 6.50883000e-03 1.93579000e-01 2.77200000e-02]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-512/ CPU 100 edge-centric 443673856 56
+[2.00000000e+00 1.00000000e+00 5.02212484e+13 6.72174000e-03 2.15138000e+00 1.43034000e-01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-4096/ CPU 100 edge-centric 3322511392 56
+[2.00000000e+00 1.00000000e+00 6.47761414e+15 6.75106000e-03 4.94569000e+01 1.46493000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-32768/ CPU 100 wedge-centric 22775752432 56
+[2.00000000e+00 1.00000000e+00 7.13111685e+17 4.15881000e-01 1.38645000e+03 1.96396000e+01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-8/ CPU 100 edge-centric 9099040 56
+[2.00000000e+00 2.00000000e+00 1.17540623e+09 1.23651000e-02 2.03018000e-02 4.94100000e-03]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron19-8/ CPU 100 edge-centric 74000944 56
+[2.00000000e+00 2.00000000e+00 2.70535034e+10 1.29244000e-02 1.23187000e-01 3.94500000e-02]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron22-8/ CPU 100 edge-centric 597480256 56
+[2.00000000e+00 2.00000000e+00 5.99812571e+11 4.64742000e-02 1.80010000e+00 2.76411000e-01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron25-8/ CPU 100 edge-centric 4803002208 56
+[2.00000000e+00 2.00000000e+00 1.29107053e+13 3.57611000e-01 2.71457000e+01 1.82127000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron28-8/ CPU 100 edge-centric 38527292416 56
+[2.00000000e+00 2.00000000e+00 2.77111671e+14 3.50061000e+00 3.51242000e+02 1.92465000e+01]
+[0.0361621, 0.22780783, 2.3011357400000003, 50.92858106, 1406.505481, 0.0376079, 0.17556139999999998, 2.1229852, 29.324581, 373.98911000000004]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-8/ CPU 100 edge-centric 181980800 56
+[1.00000000e+00 1.00000000e+00 1.17540623e+09 1.67394000e-03 5.94616000e-03 4.36000000e-03]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-64/ CPU 100 edge-centric 1223895360 56
+[1.00000000e+00 1.00000000e+00 3.23163873e+11 1.63913000e-03 6.95429000e-02 3.16250000e-02]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-512/ CPU 100 edge-centric 8873477120 56
+[1.00000000e+00 1.00000000e+00 5.02212484e+13 1.64700000e-03 1.28781000e+00 1.52196000e-01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-4096/ CPU 100 edge-centric 66450227840 56
+[1.00000000e+00 1.00000000e+00 6.47761414e+15 1.71494000e-03 2.54365000e+01 1.15223000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-32768/ CPU 100 edge-centric 455515048640 56
+[1.00000000e+00 1.00000000e+00 7.13111685e+17 1.72997000e-03 1.06878000e+03 7.21787000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron16-8/ CPU 100 edge-centric 181980800 56
+[1.00000000e+00 1.00000000e+00 1.17540623e+09 1.72997000e-03 6.27804000e-03 5.05900000e-03]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron19-8/ CPU 100 edge-centric 1480018880 56
+[1.00000000e+00 1.00000000e+00 2.70535034e+10 1.70612000e-03 6.16529000e-02 3.58070000e-02]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron22-8/ CPU 100 edge-centric 11949605120 56
+[1.00000000e+00 1.00000000e+00 5.99812571e+11 2.08116000e-03 9.79461000e-01 2.72862000e-01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron25-8/ CPU 100 edge-centric 96060044160 56
+[1.00000000e+00 1.00000000e+00 1.29107053e+13 1.49040000e-02 1.49346000e+01 1.93609000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron28-8/ CPU 100 edge-centric 770545848320 56
+[1.00000000e+00 1.00000000e+00 2.77111671e+14 7.77318000e-02 2.50278000e+02 1.57297000e+01]
+[0.0119801, 0.10280703000000001, 1.4416529999999999, 26.590444939999998, 1075.99959997, 0.01306701, 0.09916602, 1.25440416, 16.885593999999998, 266.0854318]["make: 'butterfly.bin' is up to date.\n", 'prperties 16 18 ec partition num: 1 1\n', '1 9.58443e-05 5.10216e-05 2.5e-05\n', 'prperties 705632 3781322 ec partition num: 1 1\n', '206508691 0.00156093 0.201692 0.018991\n']
+['trackers', 'kron17-8', 'kron16-512', 'kron28-8', 'kron25-8', 'kron21-8', 'bi-sk', 'kron19-8', 'kron16-64', 'kron20-2048', 'livejournal', 'bi-twitter', 'kron26-8', 'kron16-32768', 'kron16-32', 'kron17-16384', 'kron16-4096', 'kron24-8', 'kron16-2048', 'kron16-8', 'kron15-8', 'filcker', 'kron23-8', 'bi-uk', 'kron22-8', 'MANN-a81', 'kron18-8192', 'kron16-8192', 'kron27-8', 'delicious', 'kron19-4096', 'kron16-128', 'kron5-10', 'twitter', 'kron10-500', 'orkut', 'kron16-10000']
+[7.00000000e+00 1.00000000e+00 3.53457784e+17 8.84995000e-02 9.67682000e+02 3.25919000e+01]
+[1.30000000e+01 1.00000000e+00 3.53457784e+17 2.88807000e-01 1.10360000e+03 3.90696000e+01]
+[2.60000000e+01 1.00000000e+00 3.53457784e+17 1.14966000e+00 1.19392000e+03 6.76366000e+01]
+[5.10000000e+01 1.00000000e+00 3.53457784e+17 4.41646000e+00 1.40046000e+03 1.42993000e+02]
+[1.02000000e+02 1.00000000e+00 3.53457784e+17 1.78686000e+01 1.64799000e+03 2.84907000e+02]
+[1000.3623995, 1142.9584069999999, 1262.7062600000002, 1547.86946, 1950.7656]
+[9.00000000e+00 7.00000000e+00 3.53457784e+17 4.04513000e+00 8.49676000e+02 4.42634000e+01]
+[1.30000000e+01 1.30000000e+01 3.53457784e+17 3.91372000e+00 9.62149000e+02 6.76780000e+01]
+[1.70000000e+01 2.60000000e+01 3.53457784e+17 4.72582000e+00 1.08359000e+03 9.19799000e+01]
+[2.40000000e+01 5.10000000e+01 3.53457784e+17 4.09777000e+00 1.44961000e+03 1.07292000e+02]
+[3.30000000e+01 1.02000000e+02 3.53457784e+17 4.98475000e+00 2.38261000e+03 1.47280000e+02]
+[897.9845300000001, 1033.74072, 1180.29572, 1560.99977, 2534.8747500000004]
+
+
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron23-8/ CPU 100 edge-centric 119732304 56
+[1.10000000e+01 8.00000000e+00 1.67156376e+12 2.71204000e+00 7.90691000e+00 3.34123000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron24-8/ CPU 100 edge-centric 239835147 56
+[1.10000000e+01 8.00000000e+00 4.64844094e+12 5.06061000e+00 1.87095000e+01 6.31639000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron25-8/ CPU 100 edge-centric 480300220 56
+[1.10000000e+01 8.00000000e+00 1.29107053e+13 7.55078000e+00 4.35251000e+01 1.19629000e+01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron26-8/ CPU 100 edge-centric 961610108 56
+[1.10000000e+01 8.00000000e+00 3.57494962e+13 1.72116000e+01 1.09173000e+02 2.44320000e+01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron27-8/ CPU 100 edge-centric 1924897827 56
+[1.10000000e+01 8.00000000e+00 9.99109836e+13 3.42160000e+01 2.59940000e+02 4.80353000e+01]
+[13.96018, 30.0865, 63.038779999999996, 150.8166, 342.1913]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron23-8/ CPU 100 edge-centric 299330760 56
+[5.00000000e+00 5.00000000e+00 1.67156376e+12 5.29684000e-01 6.33835000e+00 1.13079000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron24-8/ CPU 100 edge-centric 599587868 56
+[5.00000000e+00 5.00000000e+00 4.64844094e+12 9.04508000e-01 1.41515000e+01 2.25427000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron25-8/ CPU 100 edge-centric 1200750552 56
+[5.00000000e+00 5.00000000e+00 1.29107053e+13 1.55184000e+00 3.53218000e+01 3.95818000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron26-8/ CPU 100 edge-centric 2404025272 56
+[5.00000000e+00 5.00000000e+00 3.57494962e+13 3.57839000e+00 8.99014000e+01 7.97719000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron27-8/ CPU 100 edge-centric 4812244568 56
+[5.00000000e+00 5.00000000e+00 9.99109836e+13 7.30360000e+00 2.06884000e+02 1.66419000e+01]
+[7.998824, 17.310278, 40.83182, 101.45697999999999, 230.82949999999997]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron23-8/ CPU 100 edge-centric 1197323040 56
+[2.00000000e+00 2.00000000e+00 1.67156376e+12 9.12237000e-02 4.16607000e+00 4.77180000e-01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron24-8/ CPU 100 edge-centric 2398351472 56
+[2.00000000e+00 2.00000000e+00 4.64844094e+12 2.23565000e-01 1.17373000e+01 1.23680000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron25-8/ CPU 100 edge-centric 4803002208 56
+[2.00000000e+00 2.00000000e+00 1.29107053e+13 3.79898000e-01 2.85160000e+01 2.17382000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron26-8/ CPU 100 edge-centric 9616101088 56
+[2.00000000e+00 2.00000000e+00 3.57494962e+13 8.59874000e-01 6.56965000e+01 6.76415000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron27-8/ CPU 100 edge-centric 19248978272 56
+[2.00000000e+00 2.00000000e+00 9.99109836e+13 1.65105000e+00 1.43917000e+02 9.38336000e+00]
+[4.7344737, 13.197665, 31.069717999999998, 73.320524, 154.95141]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron23-8/ CPU 100 edge-centric 23946460800 56
+[1.00000000e+00 1.00000000e+00 1.67156376e+12 1.27609000e-02 2.78082000e+00 5.65372000e-01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron24-8/ CPU 100 edge-centric 47967029440 56
+[1.00000000e+00 1.00000000e+00 4.64844094e+12 9.53794000e-03 6.07901000e+00 9.79185000e-01]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron25-8/ CPU 100 edge-centric 96060044160 56
+[1.00000000e+00 1.00000000e+00 1.29107053e+13 1.45983000e-01 1.55165000e+01 2.23319000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron26-8/ CPU 100 edge-centric 192322021760 56
+[1.00000000e+00 1.00000000e+00 3.57494962e+13 2.35150000e-02 3.88937000e+01 3.82707000e+00]
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/kron27-8/ CPU 100 edge-centric 384979565440 56
+[1.00000000e+00 1.00000000e+00 9.99109836e+13 5.35901000e-02 1.03118000e+02 8.24838000e+00]
+[3.3589529, 7.067732940000001, 17.895673, 42.744285000000005, 111.41997009999999]["make: 'butterfly.bin' is up to date.\n", 'prperties 16 18 ec partition num: 1 1\n', '1 7.51019e-05 5.38826e-05 2.2e-05\n', 'prperties 705632 3781322 ec partition num: 1 1\n', '206508691 0.00151801 0.191144 0.018294\n']
+['trackers', 'kron17-8', 'kron16-512', 'kron28-8', 'kron25-8', 'kron21-8', 'bi-sk', 'kron15-16384', 'kron19-8', 'kron16-64', 'kron20-2048', 'livejournal', 'bi-twitter', 'kron12-2048', 'kron26-8', 'kron16-32768', 'kron16-32', 'kron17-16384', 'kron16-4096', 'kron24-8', 'kron16-2048', 'kron16-8', 'kron15-8', 'filcker', 'kron23-8', 'bi-uk', 'kron22-8', 'kron13-4096', 'MANN-a81', 'kron18-8192', 'kron16-8192', 'kron27-8', 'delicious', 'kron19-4096', 'kron16-128', 'kron5-10', 'kron14-8192', 'twitter', 'kron10-500', 'orkut', 'kron18-11818']
+[4.00000000e+00 1.00000000e+01 1.05954273e+13 1.86703000e-02 9.43550000e-01 5.79407000e-02]
+[4.00000000e+00 1.00000000e+01 1.63684233e+14 1.87180000e-02 4.99044000e+00 2.43735000e-01]
+[4.00000000e+00 1.00000000e+01 2.75235211e+15 2.33219000e-02 2.53756000e+01 9.80883000e-01]
+[4.00000000e+00 1.00000000e+01 4.24204526e+16 9.36501000e-02 1.71708000e+02 2.89134000e+01]
+[4.00000000e+00 1.00000000e+01 7.13111685e+17 7.36668000e-01 1.40429000e+03 4.03302000e+01]
+[1.020161, 5.252893, 26.379804899999996, 200.71505009999998, 1445.356868]
+[3.00000000e+00 4.00000000e+00 1.05954273e+13 1.09167000e-02 9.41944000e-01 4.36997000e-02]
+[3.00000000e+00 4.00000000e+00 1.63684233e+14 1.19810000e-02 3.60107000e+00 2.06197000e-01]
+[3.00000000e+00 4.00000000e+00 2.75235211e+15 1.67699000e-02 2.25910000e+01 7.70939000e-01]
+[3.00000000e+00 4.00000000e+00 4.24204526e+16 2.41188000e-01 1.63097000e+02 5.09569000e+01]
+[3.00000000e+00 4.00000000e+00 7.13111685e+17 6.98542000e-01 1.32547000e+03 2.28731000e+01]
+[0.9965604, 3.819248, 23.3787089, 214.295088, 1349.0416420000001]
+[1.00000000e+00 1.00000000e+00 1.05954273e+13 1.42598000e-03 3.19283000e-01 3.09570000e-02]
+[1.00000000e+00 1.00000000e+00 1.63684233e+14 1.38593000e-03 2.48241000e+00 1.19351000e-01]
+[1.00000000e+00 1.00000000e+00 2.75235211e+15 1.42002000e-03 1.74102000e+01 4.41292000e-01]
+[1.00000000e+00 1.00000000e+00 4.24204526e+16 1.43695000e-03 1.17121000e+02 1.74380000e+00]
+[1.00000000e+00 1.00000000e+00 7.13111685e+17 1.36209000e-03 1.10224000e+03 6.91732000e+00]
+[0.35166598, 2.60314693, 17.85291202, 118.86623694999999, 1109.15868209]

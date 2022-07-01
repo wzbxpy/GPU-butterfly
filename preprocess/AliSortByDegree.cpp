@@ -96,7 +96,7 @@ void loadGeneratedGraph(string path)
         }
     }
     cout << "here" << endl;
-    int vertexCount = left.size() + right.size();
+    vertexCount = left.size() + right.size();
     b.resize(vertexCount);
     cout << "here" << endl;
 

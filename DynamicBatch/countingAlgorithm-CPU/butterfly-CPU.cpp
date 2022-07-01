@@ -267,6 +267,7 @@ void memset_kernel_withoutAtomic(shared_ptr<int[]> hashTable, long long offset, 
 
 void EMRC(string path, parameter para)
 {
+    cout << "EMRC" << endl;
     graph *G_first = new graph;
     graph *G_second = new graph;
     int threadNum = para.processorNum;
@@ -400,6 +401,7 @@ void wedgeCentric_kernel_withoutAtomic(shared_ptr<int[]> hashTable, long long be
         P.clear();
         // load next vertex
         loadNextVertex(vertex, nextVertex.get(), previousVertex);
+        // vertex += threadNum;
     }
     *partSum += mySum;
 }
@@ -418,7 +420,7 @@ void wedgeCentric(string path, parameter para)
     memset(&hashTable[0], 0, sizeof(int) * maxVertexCount * maxVertexCount);
     memset(&partSum[0], 0, sizeof(long long) * threadNum);
     thread threads[threadNum];
-    int batchSize = 0;
+    long long batchSize = 0;
     long long ans = 0;
     int *edgeList;
     double startTime = wtime();
@@ -578,39 +580,39 @@ void sharedHashTable(graph *G, int threadNum)
     double startTime = wtime();
     long long ans = 0;
     cout << threadNum << endl;
-    // for (int vertex = 0; vertex < G->vertexCount; vertex++)
+    for (int vertex = 0; vertex < G->vertexCount; vertex++)
+    {
+        if (G->beginPos[vertex + 1] - G->beginPos[vertex] < 2)
+            break;
+        for (int threadId = 0; threadId < threadNum; threadId++)
+        {
+            threads[threadId] = thread(sharedHashTable_kernel, hashTable, G, threadNum, threadId, &partSum[threadId], vertex);
+        }
+        for (auto &t : threads)
+        {
+            t.join();
+        }
+        for (int threadId = 0; threadId < threadNum; threadId++)
+        {
+            threads[threadId] = thread(cleanSharedHashTable_kernel, hashTable, G, threadNum, threadId, &partSum[threadId], vertex);
+        }
+        for (auto &t : threads)
+        {
+            t.join();
+        }
+    }
+    // for (int threadId = 0; threadId < threadNum; threadId++)
     // {
-    //     if (G->beginPos[vertex + 1] - G->beginPos[vertex] < 2)
-    //         break;
-    //     for (int threadId = 0; threadId < threadNum; threadId++)
-    //     {
-    //         threads[threadId] = thread(sharedHashTable_kernel, hashTable, G, threadNum, threadId, &partSum[threadId], vertex);
-    //     }
-    //     for (auto &t : threads)
-    //     {
-    //         t.join();
-    //     }
-    //     for (int threadId = 0; threadId < threadNum; threadId++)
-    //     {
-    //         threads[threadId] = thread(cleanSharedHashTable_kernel, hashTable, G, threadNum, threadId, &partSum[threadId], vertex);
-    //     }
-    //     for (auto &t : threads)
-    //     {
-    //         t.join();
-    //     }
+    //     threads[threadId] = thread(sharedHashTable_kernel_withoutScheduling, hashTable, G, threadNum, threadId, &partSum[threadId]);
     // }
-    for (int threadId = 0; threadId < threadNum; threadId++)
-    {
-        threads[threadId] = thread(sharedHashTable_kernel_withoutScheduling, hashTable, G, threadNum, threadId, &partSum[threadId]);
-    }
-    for (auto &t : threads)
-    {
-        t.join();
-    }
-    for (int i = 0; i < threadNum; i++)
-    {
-        ans += partSum[i];
-    }
+    // for (auto &t : threads)
+    // {
+    //     t.join();
+    // }
+    // for (int i = 0; i < threadNum; i++)
+    // {
+    //     ans += partSum[i];
+    // }
     cout << ans << " " << wtime() - startTime << endl;
 }
 

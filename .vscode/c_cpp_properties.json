@@ -11,7 +11,8 @@
             "cppStandard": "gnu++14",
             "intelliSenseMode": "linux-gcc-x64",
             "compilerArgs": [
-                "-fcilkplus"
+                "-fcilkplus",
+                "-L\"$(shell dirname $(cucc))\"/../lib64"
             ],
             "configurationProvider": "ms-vscode.makefile-tools"
         }
