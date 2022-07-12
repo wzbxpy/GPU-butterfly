@@ -4,7 +4,7 @@ import numpy as np
 import time
 from util import average_of_several_run
 
-repeat = 5
+repeat = 1
 if len(sys.argv) > 1:
     repeat = int(sys.argv[1])
 
@@ -21,10 +21,10 @@ for fold in folds:
         print(fold, size)
         # run
         script1 = '/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin ' + \
-            filePath+'/ CPU 100 wedge-centric ' + str(int(size/2))+' 56'
+            filePath+'/ IO 100 wedge-centric ' + str(int(size/2))+' 56'
         print(average_of_several_run(script1, 1))
         print(script1)
         script2 = '/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin ' + \
-            filePath+'/ CPU 100 edge-centric ' + str(int(size/2))+' 56'
+            filePath+'/ IO 100 edge-centric ' + str(int(size/2))+' 56'
         print(average_of_several_run(script2, 1))
         print(script2)

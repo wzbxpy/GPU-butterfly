@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Jul  1 14:33:55 2022
+# Make data base, printed on Tue Jul 12 17:48:12 2022
 
 # Variables
 
@@ -57,7 +57,7 @@ LC_NAME = zh_CN.UTF-8
 # environment
 VSCODE_CWD = /home/wzb
 # environment
-SSH_CONNECTION = 172.16.0.61 48962 172.16.0.71 22
+SSH_CONNECTION = 172.16.0.61 48594 172.16.0.71 22
 # environment
 PATH = /home/wzb/.vscode-server/bin/30d9c6cd9483b2cc586687151bcbcd635f373630/bin/remote-cli:/home/wzb/.local/bin:/usr/local/cuda-11.6/bin:/home/wzb/anaconda3/bin:/home/wzb/anaconda3/condabin:/usr/local/cuda-11.2/bin:/home/wzb/.local/bin:/usr/local/cuda-11.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 # environment
@@ -83,7 +83,7 @@ VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /home/wzb/bc/GPU-butterfly
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/1004/vscode-ipc-bf4579c4-b0e2-4703-898d-b5366a7604ca.sock
+VSCODE_IPC_HOOK_CLI = /run/user/1004/vscode-ipc-49f0fbed-c033-49b2-a1dc-3fa2e1b58e95.sock
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -117,7 +117,7 @@ MAKECMDGOALS := all
 # environment
 SHLVL = 3
 # environment
-XDG_SESSION_ID = 1990
+XDG_SESSION_ID = 2365
 # environment
 USER = wzb
 # environment
@@ -141,7 +141,7 @@ MAKEFLAGS = pqrR
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_CLIENT = 172.16.0.61 48962 22
+SSH_CLIENT = 172.16.0.61 48594 22
 # environment
 MAIL = /var/mail/wzb
 # automatic
@@ -195,9 +195,9 @@ _CE_CONDA =
 
 # Directories
 
-# . (device 2050, inode 56610425): 22 files, no impossibilities.
+# . (device 2050, inode 56610425): 21 files, no impossibilities.
 
-# 22 files, no impossibilities in 1 directories.
+# 21 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -247,12 +247,12 @@ GNUmakefile:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 30 / storage = 322 B / avg = 10 B
-# current buf: size = 8162 B / used = 322 B / count = 30 / avg = 10 B
+# strcache buffers: 1 (0) / strings = 29 / storage = 308 B / avg = 10 B
+# current buf: size = 8162 B / used = 308 B / count = 29 / avg = 10 B
 
-# strcache performance: lookups = 33 / hit rate = 9%
+# strcache performance: lookups = 32 / hit rate = 9%
 # hash-table stats:
-# Load=30/8192=0%, Rehash=0, Collisions=1/33=3%
-# Finished Make data base on Fri Jul  1 14:33:55 2022
+# Load=29/8192=0%, Rehash=0, Collisions=1/32=3%
+# Finished Make data base on Tue Jul 12 17:48:12 2022
 
  

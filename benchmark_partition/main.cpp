@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
             else
             {
 
-                G->partitionAndStore(para.partitionNum, path, false, para.option);
+                G->partitionAndStore(para.partitionNum, path, false, para.option, para);
             }
             // G->loadGraph(path);
         }

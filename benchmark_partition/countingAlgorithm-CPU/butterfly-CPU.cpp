@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <queue>
 #include <vector>
+#include <cmath>
 using namespace std;
 const int chunckSize = 5;
 
@@ -43,6 +44,16 @@ struct tas_lock
     void unlock() { lock_.store(false, std::memory_order_release); }
 };
 
+void cleanCSRmemory(graph *G)
+{
+    if (G->edgeList != nullptr)
+        delete[] G->edgeList;
+    if (G->beginPos != nullptr)
+        delete[] G->beginPos;
+    G->edgeList = nullptr;
+    G->beginPos = nullptr;
+}
+
 int getMaxVertexCount(string path, int partitionNum)
 {
     int vertexCount, x;
@@ -59,9 +70,9 @@ inline void loadNextVertex(int &vertex, atomic<int> *nextVertex, int offsets)
     vertex = (vertex - offsets + 1) % chunckSize != 0 ? vertex + 1 : nextVertex->fetch_add(chunckSize);
 }
 
-void edgeCentric_kernel(int *hashTable, graph *G_src, graph *G_dst, int threadNum, int threadId, long long *partSum, shared_ptr<atomic<int>> nextVertex, int partitionNumSrc, int partitionNumDst, int vertexOffsets, long long maxVertexCount, long long beginPosition[], long long endPosition[], int dstOffsets)
+void edgeCentric_kernel(int *hashTable, graph *G_src, graph *G_dst, int threadNum, int threadId, long long *partSum, shared_ptr<atomic<int>> nextVertex, int partitionNumSrc, int partitionNumDst, int vertexOffsets, long long maxVertexCount, long long beginPosition[], long long endPosition[], int dstOffsets, vector<int> &indexToNewId, vector<int> &indexToRawId, int ignoredVertex)
 {
-    int vertex = dstOffsets / partitionNumDst + threadId * chunckSize;
+    int vertex = threadId * chunckSize;
     long long mySum = 0;
     hashTable += threadId * maxVertexCount;
     for (; vertex < G_src->vertexCount;)
@@ -74,18 +85,15 @@ void edgeCentric_kernel(int *hashTable, graph *G_src, graph *G_dst, int threadNu
         for (auto oneHopNeighborID = G_src->beginPos[vertex]; oneHopNeighborID < G_src->beginPos[vertex + 1]; oneHopNeighborID += 1)
         {
             int oneHopNeighbor = G_src->edgeList[oneHopNeighborID];
-            if (oneHopNeighbor < dstOffsets)
+            if (oneHopNeighbor < ignoredVertex)
                 continue;
-            int bound = vertex * partitionNumSrc + vertexOffsets < oneHopNeighbor ? vertex * partitionNumSrc + vertexOffsets : oneHopNeighbor;
+            int bound = indexToRawId[vertex] < oneHopNeighbor ? indexToRawId[vertex] : oneHopNeighbor;
             for (auto twoHopNeighborID = beginPosition[oneHopNeighbor]; twoHopNeighborID < endPosition[oneHopNeighbor]; twoHopNeighborID += 1)
             {
                 int twoHopNeighbor = G_dst->edgeList[twoHopNeighborID];
                 if (twoHopNeighbor >= bound)
                     break;
-                if (partitionNumDst == 1)
-                    mySum += hashTable[twoHopNeighbor - dstOffsets]++;
-                else
-                    mySum += hashTable[(twoHopNeighbor - dstOffsets) / partitionNumDst]++;
+                mySum += hashTable[indexToNewId[twoHopNeighbor] - dstOffsets]++;
             }
         }
         // clean hashtable
@@ -99,24 +107,21 @@ void edgeCentric_kernel(int *hashTable, graph *G_src, graph *G_dst, int threadNu
             for (auto oneHopNeighborID = G_src->beginPos[vertex]; oneHopNeighborID < G_src->beginPos[vertex + 1]; oneHopNeighborID += 1)
             {
                 int oneHopNeighbor = G_src->edgeList[oneHopNeighborID];
-                if (oneHopNeighbor < dstOffsets)
+                if (oneHopNeighbor < ignoredVertex)
                     continue;
-                int bound = vertex * partitionNumSrc + vertexOffsets < oneHopNeighbor ? vertex * partitionNumSrc + vertexOffsets : oneHopNeighbor;
+                int bound = indexToRawId[vertex] < oneHopNeighbor ? indexToRawId[vertex] : oneHopNeighbor;
                 for (auto twoHopNeighborID = beginPosition[oneHopNeighbor]; twoHopNeighborID < endPosition[oneHopNeighbor]; twoHopNeighborID += 1)
                 {
                     int twoHopNeighbor = G_dst->edgeList[twoHopNeighborID];
                     if (twoHopNeighbor >= bound)
                         break;
-                    if (partitionNumDst == 1)
-                        hashTable[twoHopNeighbor - dstOffsets] = 0;
-                    else
-                        hashTable[(twoHopNeighbor - dstOffsets) / partitionNumDst] = 0;
+                    hashTable[indexToNewId[twoHopNeighbor] - dstOffsets] = 0;
                 }
             }
         }
         // load next vertex
         // vertex = (vertex + 1) % chunckSize != 0 ? vertex + 1 : nextVertex->fetch_add(chunckSize);
-        loadNextVertex(vertex, nextVertex.get(), dstOffsets / partitionNumDst);
+        loadNextVertex(vertex, nextVertex.get(), 0);
         // vertex += threadNum;
     }
     *partSum = mySum;
@@ -126,8 +131,8 @@ void edgeCentric_kernel(int *hashTable, graph *G_src, graph *G_dst, int threadNu
 // Given the partition id, i.e. boundary of dst id, obtaining the begin and end position of each neighborlist
 void initializeBeginPosition_kernel(long long beginPosition[], long long endPosition[], graph *G, int threadNum, int threadId, int boundary, bool isFirst, bool isLast, int startVertex)
 {
-    int range = (G->vertexCount - startVertex) / threadNum;
-    int start = startVertex + threadId * range;
+    int range = G->vertexCount / threadNum;
+    int start = threadId * range;
     int end = start + range;
     if (threadId + 1 == threadNum)
         end = G->vertexCount;
@@ -155,7 +160,7 @@ void initializeBeginPosition_kernel(long long beginPosition[], long long endPosi
     }
 }
 
-void edgeCentric(string path, parameter para)
+void edgeCentric(string path, parameter para, graph *G)
 {
     // initilize
     graph *G_src = new graph;
@@ -164,7 +169,10 @@ void edgeCentric(string path, parameter para)
     int partitionNumSrc = para.partitionNum;
     int partitionNumDst = para.partitionNum;
     int vertexCount = getMaxVertexCount(path, partitionNumDst);
-    long long maxVertexCountInBatch = ceil(vertexCount / (double)para.batchNum / (double)partitionNumDst);
+    long long maxVertexCountInBatch = 0;
+    for (int i = 0; i < partitionNumDst; i++)
+        maxVertexCountInBatch = max((long long)G->indexToRawId[i].size(), maxVertexCountInBatch);
+    maxVertexCountInBatch = ceil(maxVertexCountInBatch / (double)para.batchNum);
     shared_ptr<int[]> hashTable(new int[threadNum * maxVertexCountInBatch]);
     shared_ptr<long long[]> Position(new long long[vertexCount * 2]);
     shared_ptr<long long[]> partSum(new long long[threadNum]);
@@ -181,24 +189,32 @@ void edgeCentric(string path, parameter para)
     for (int i = 0; i < partitionNumSrc; i++)
     {
         subGraphPath = path + "partition" + to_string(partitionNumSrc) + "src" + to_string(i);
+        cleanCSRmemory(G_src);
         transferTime += G_src->loadGraph(subGraphPath);
         for (int j = 0; j < partitionNumDst; j++)
         {
+            cleanCSRmemory(G_dst);
             subGraphPath = path + "partition" + to_string(partitionNumDst) + "dst" + to_string(j);
             transferTime += G_dst->loadGraph(subGraphPath);
+            // cout << i << ' ' << j << endl;
             for (int b = 0; b < para.batchNum; b++)
             {
                 startTime = wtime();
                 // initilize start position of this batch
+                int boundary;
+                if (b + 1 == para.batchNum)
+                    boundary = G->indexToRawId[j].back();
+                else
+                    boundary = G->indexToRawId[j][maxVertexCountInBatch * (b + 1)];
                 for (int threadId = 0; threadId < threadNum; threadId++)
-                    threads[threadId] = thread(initializeBeginPosition_kernel, &Position[(b % 2) * vertexCount], &Position[((b + 1) % 2) * vertexCount], G_dst, threadNum, threadId, maxVertexCountInBatch * partitionNumDst * (b + 1), b == 0, b == para.batchNum - 1, maxVertexCountInBatch * partitionNumDst * b);
+                    threads[threadId] = thread(initializeBeginPosition_kernel, &Position[(b % 2) * vertexCount], &Position[((b + 1) % 2) * vertexCount], G_dst, threadNum, threadId, boundary, b == 0, b == para.batchNum - 1, G->indexToRawId[j][maxVertexCountInBatch * b]);
                 for (auto &t : threads)
                     t.join();
                 initializeTime += getDeltaTime(startTime);
-                *nextVertex = threadNum * chunckSize + maxVertexCountInBatch * b;
+                *nextVertex = threadNum * chunckSize;
                 // count the butterfies in each batch
                 for (int threadId = 0; threadId < threadNum; threadId++)
-                    threads[threadId] = thread(edgeCentric_kernel, hashTable.get(), G_src, G_dst, threadNum, threadId, &partSum[threadId], nextVertex, partitionNumSrc, partitionNumDst, i, maxVertexCountInBatch, &Position[(b % 2) * vertexCount], &Position[((b + 1) % 2) * vertexCount], maxVertexCountInBatch * partitionNumDst * b);
+                    threads[threadId] = thread(edgeCentric_kernel, hashTable.get(), G_src, G_dst, threadNum, threadId, &partSum[threadId], nextVertex, partitionNumSrc, partitionNumDst, i, maxVertexCountInBatch, &Position[(b % 2) * vertexCount], &Position[((b + 1) % 2) * vertexCount], maxVertexCountInBatch * b, ref(G->indexToNewId), ref(G->indexToRawId[i]), G->indexToRawId[j][maxVertexCountInBatch * b]);
                 for (auto &t : threads)
                     t.join();
                 computeTime += getDeltaTime(startTime);
@@ -359,41 +375,39 @@ static int computeEndPosition(long long beginPos1[], long long beginPos2[], int 
     return l;
 }
 
-void wedgeCentric_kernel_withoutAtomic(shared_ptr<int[]> hashTable, long long beginPosFirst[], int edgeListFirst[], long long beginPosSecond[], int edgeListSecond[], int threadNum, int threadId, long long *partSum, shared_ptr<atomic<int>> nextVertex, int partitionNum, int vertexOffsets, long long maxVertexCount, int lastVertex, int previousVertex, tas_lock *lock)
+void wedgeCentric_kernel_withoutAtomic(shared_ptr<int[]> hashTable, long long beginPosFirst[], int edgeListFirst[], long long beginPosSecond[], int edgeListSecond[], int threadNum, int threadId, long long *partSum, shared_ptr<atomic<int>> nextVertex, int partitionNum, int vertexOffsets, long long maxVertexCount, int lastVertex, int previousVertex, tas_lock *lock, vector<int> indexToNewId)
 {
     int vertex = previousVertex + threadId * chunckSize;
     long long mySum = 0;
     long long beginPosFirstOffset = beginPosFirst[previousVertex];
     long long beginPosSecondOffset = beginPosSecond[previousVertex];
-    int flag = edgeListFirst[0] % partitionNum > edgeListSecond[0] % partitionNum;
     queue<int> Q;
     vector<int> P;
     for (; vertex < lastVertex;)
     {
         for (auto firstNeighborID = beginPosFirst[vertex]; firstNeighborID < beginPosFirst[vertex + 1]; firstNeighborID += 1)
-            Q.push(edgeListFirst[firstNeighborID - beginPosFirstOffset] / partitionNum);
+            Q.push(edgeListFirst[firstNeighborID - beginPosFirstOffset]);
         for (auto secondNeighborID = beginPosSecond[vertex]; secondNeighborID < beginPosSecond[vertex + 1]; secondNeighborID += 1)
         {
             int secondNeighbor = edgeListSecond[secondNeighborID - beginPosSecondOffset];
             if (secondNeighbor >= vertex)
                 break;
-            P.push_back(secondNeighbor / partitionNum);
+            P.push_back(secondNeighbor);
         }
         while (!Q.empty())
         {
             int firstNeighbor = Q.front();
             Q.pop();
-            if (lock[firstNeighbor].trylock())
+            if (lock[indexToNewId[firstNeighbor]].trylock())
             {
-                long long offset = firstNeighbor * maxVertexCount;
-                int bound = firstNeighbor + flag;
+                long long offset = indexToNewId[firstNeighbor] * maxVertexCount;
                 for (auto secondNeighbor : P)
                 {
-                    if (secondNeighbor >= bound)
+                    if (secondNeighbor >= firstNeighbor)
                         break;
-                    mySum += hashTable[offset + secondNeighbor]++;
+                    mySum += hashTable[offset + indexToNewId[secondNeighbor]]++;
                 }
-                lock[firstNeighbor].unlock();
+                lock[indexToNewId[firstNeighbor]].unlock();
             }
             else
             {
@@ -408,13 +422,18 @@ void wedgeCentric_kernel_withoutAtomic(shared_ptr<int[]> hashTable, long long be
     *partSum += mySum;
 }
 
-void wedgeCentric(string path, parameter para)
+void wedgeCentric(string path, parameter para, graph *G)
 {
     graph *G_first = new graph;
     graph *G_second = new graph;
     int threadNum = para.processorNum;
     int partitionNum = para.partitionNum;
-    long long maxVertexCount = ceil(getMaxVertexCount(path, partitionNum) / (double)partitionNum);
+
+    long long maxVertexCount = 0;
+    for (int i = 0; i < partitionNum; i++)
+        maxVertexCount = max((long long)G->indexToRawId[i].size(), maxVertexCount);
+    cout << maxVertexCount << endl;
+
     shared_ptr<int[]> hashTable(new int[(long long)maxVertexCount * maxVertexCount]);
     shared_ptr<long long[]> partSum(new long long[threadNum]);
     shared_ptr<atomic<int>> nextVertex(new atomic<int>(threadNum * chunckSize));
@@ -433,7 +452,8 @@ void wedgeCentric(string path, parameter para)
         {
             // load begpos and initilize
             startTime = wtime();
-
+            cleanCSRmemory(G_first);
+            cleanCSRmemory(G_second);
             G_first->loadBeginPos(path + "partition" + to_string(partitionNum) + "dst" + to_string(i));
             G_second->loadBeginPos(path + "partition" + to_string(partitionNum) + "dst" + to_string(j));
             transferTime += getDeltaTime(startTime);
@@ -460,10 +480,9 @@ void wedgeCentric(string path, parameter para)
                 firstEdgeListFile.read((char *)edgeList, sizeof(int) * (G_first->beginPos[thisEnd] - G_first->beginPos[previousEnd]));
                 secondEdgeListFile.read((char *)(&edgeList[breakPoint]), sizeof(int) * (G_second->beginPos[thisEnd] - G_second->beginPos[previousEnd]));
                 transferTime += getDeltaTime(startTime);
-
                 for (int threadId = 0; threadId < threadNum; threadId++)
                 {
-                    threads[threadId] = thread(wedgeCentric_kernel_withoutAtomic, hashTable, G_first->beginPos, edgeList, G_second->beginPos, edgeList + breakPoint, threadNum, threadId, &partSum[threadId], nextVertex, partitionNum, i, maxVertexCount, thisEnd, previousEnd, lock.get());
+                    threads[threadId] = thread(wedgeCentric_kernel_withoutAtomic, hashTable, G_first->beginPos, edgeList, G_second->beginPos, edgeList + breakPoint, threadNum, threadId, &partSum[threadId], nextVertex, partitionNum, i, maxVertexCount, thisEnd, previousEnd, lock.get(), ref(G->indexToNewId));
                 }
                 for (auto &t : threads)
                 {
@@ -487,7 +506,7 @@ void wedgeCentric(string path, parameter para)
             {
                 threads[threadId] = thread(memset_kernel_withoutAtomic, hashTable, length * threadId, length);
             }
-            memset(&hashTable[length * threadNum], 0, maxVertexCount * maxVertexCount - length * threadNum);
+            memset(&hashTable[length * threadNum], 0, (maxVertexCount * maxVertexCount - length * threadNum) * sizeof(int));
             for (auto &t : threads)
             {
                 t.join();
@@ -632,11 +651,11 @@ void BC_CPU(string path, graph *G, parameter para, bool concurrentBench, bool te
     }
     if (para.varient == edgecentric)
     {
-        edgeCentric(path, para);
+        edgeCentric(path, para, G);
     }
     else
     {
-        wedgeCentric(path, para);
+        wedgeCentric(path, para, G);
         cout << "here2" << endl;
     }
 }

@@ -485,7 +485,7 @@ void wedgeCentric(string path, parameter para)
             {
                 threads[threadId] = thread(memset_kernel_withoutAtomic, hashTable, length * threadId, length);
             }
-            memset(&hashTable[length * threadNum], 0, maxVertexCount * maxVertexCount - length * threadNum);
+            memset(&hashTable[length * threadNum], 0, (maxVertexCount * maxVertexCount - length * threadNum) * sizeof(int));
             for (auto &t : threads)
             {
                 t.join();

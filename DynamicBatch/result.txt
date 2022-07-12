@@ -3,3 +3,4 @@ prperties 65536 2846837980 wc partition num: 6 numblocks216
 prperties 262144 3401673642 wc partition num: 20 numblocks216
 353457784290804843 210.297 90.9874
 prperties 1048576 3634823506 wc partition num: 71 numblocks216
+prperties 978407686 74744358622 ec partition num: 7 2

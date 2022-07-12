@@ -11,6 +11,7 @@
 #include <functional>
 #include <unordered_set>
 #include <cstdlib>
+#include <cmath>
 
 using namespace std;
 bool cmp1(int a, int b)
@@ -39,10 +40,10 @@ void graph::loadBeginPos(string path)
 double graph::loadGraph(string path)
 {
     // cout << "Loading graph..." << path << endl;
-    double startTime = clock();
     loadBeginPos(path);
     if (edgeList == nullptr)
         edgeList = new int[edgeCount];
+    double startTime = clock();
     fstream adjFile(path + "/adj.bin", ios::in | ios::binary);
     adjFile.read((char *)edgeList, sizeof(int) * (edgeCount));
     adjFile.close();
@@ -203,7 +204,7 @@ struct Props
     };
 };
 
-void graph::partitionAndStoreSrc(int num, string partitionedFolder, vector<int> part, vector<int> index)
+void graph::partitionAndStoreSrc(int num, string partitionedFolder, vector<int> part, vector<int> index, long long &maxEdges, long long &minEdges, int &maxVertives)
 {
     partitionNumSrc = num;
     Files *files = new Files[num];
@@ -227,8 +228,14 @@ void graph::partitionAndStoreSrc(int num, string partitionedFolder, vector<int> 
         files[n].adj.write((char *)&edgeList[beginPos[i]], sizeof(int) * (beginPos[i + 1] - beginPos[i]));
     }
     // write properties
+    maxVertives = 0;
+    maxEdges = 0;
+    minEdges = props[0].edges;
     for (int n = 0; n < num; n++)
     {
+        maxEdges = max(maxEdges, props[n].edges);
+        minEdges = min(minEdges, props[n].edges);
+        maxVertives = max(maxVertives, int(props[n].vertices));
         files[n].begin.write((char *)&props[n].edges, sizeof(long long));
         files[n].properties << 0 << " " << props[n].vertices << " " << props[n].edges << endl;
         files[n].properties.close();
@@ -275,7 +282,6 @@ void graph::partitionAndStoreDst(int num, string partitionedFolder, vector<int> 
             a[n].clear();
         }
     }
-    getProcessMemory();
 
     for (int n = 0; n < num; n++)
     {
@@ -290,48 +296,76 @@ void graph::partitionAndStoreDst(int num, string partitionedFolder, vector<int> 
     delete[] props;
     delete[] a;
 }
-void graph::partitionAndStore(int num, string path, bool isInMemory, partitionOption option)
+void graph::partitionAndStore(int num, string path, bool isInMemory, partitionOption option, parameter para)
 {
-    srand(0);
     loadGraph(path);
     cout << "load graph ";
-    getProcessMemory();
-    vector<int> part, index;
-    vector<int> nextIndexOfPart(num);
-    for (int i = 0; i < vertexCount; i++)
+    for (;;)
     {
-        int p;
-        switch (option)
+
+        srand(0);
+        vector<int> part, index;
+        vector<int> nextIndexOfPart(num);
+        for (int i = 0; i < vertexCount; i++)
         {
-        case radixHash:
-            p = i % num;
-            break;
-        case randomHash:
-            p = rand() % num;
-            break;
-        case rangeHash:
-            p = i / (vertexCount / num + 1);
-        default:
+            int p;
+            switch (option)
+            {
+            case radixHash:
+                p = i % num;
+                break;
+            case randomHash:
+                p = rand() % num;
+                break;
+            case rangeHash:
+                p = i / (vertexCount / num + 1);
+            default:
+                break;
+            }
+            part.push_back(p);
+            index.push_back(nextIndexOfPart[p]);
+            nextIndexOfPart[p]++;
+        }
+        long long maxEdges, minEdges;
+        int maxVertices;
+        partitionAndStoreSrc(num, path + "partition", part, index, maxEdges, minEdges, maxVertices);
+        bool fitIntoMemory = false;
+        if (para.varient == edgecentric)
+        {
+            long long size = (maxEdges * 2 + maxVertices * para.processorNum / para.batchNum) * sizeof(int);
+            if (size < para.memorySize)
+                fitIntoMemory = true;
+        }
+        if (para.varient == wedgecentric)
+        {
+            para.batchNum = ceil(2 * (maxEdges * sizeof(int)) / (para.memorySize - (long long)maxVertices * maxVertices * sizeof(int)));
+            fitIntoMemory = true;
+        }
+        cout << para.memorySize << " " << maxVertices << " " << maxEdges << " " << minEdges << " " << maxEdges / double(minEdges) << endl;
+
+        if (fitIntoMemory)
+        {
+            cout << "fited";
+            partitionAndStoreDst(num, path + "partition", part, index);
+            // creat index mapping
+            for (int i = 0; i < num; i++)
+                indexToRawId.push_back({});
+            for (int i = 0; i < vertexCount; i++)
+            {
+                indexToRawId[part[i]].push_back(i);
+            }
+            indexToNewId.swap(index);
+            cout << endl;
+            cout << "final partiton: " << para.partitionNum << " batch:" << para.batchNum << endl;
             break;
         }
-        part.push_back(p);
-        index.push_back(nextIndexOfPart[p]);
-        nextIndexOfPart[p]++;
-    }
-    if (isInMemory)
-    {
-        // In memory partition
-        partitionGraphSrc(num);
-        partitionGraphDst(num);
-        storeGraph(path);
-    }
-    else
-    {
-        partitionAndStoreSrc(num, path + "partition", part, index);
-        // getProcessMemory();
-
-        partitionAndStoreDst(num, path + "partition", part, index);
-        // getProcessMemory();
+        else
+        {
+            cout << "not fited";
+            cout << "final partiton: " << para.partitionNum << " batch:" << para.batchNum << endl;
+            num = num * 1.5;
+            para.partitionNum = num;
+        }
     }
     delete[] edgeList;
     delete[] beginPos;

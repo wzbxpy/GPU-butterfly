@@ -1,14 +1,37 @@
-cd /home/wzb/bc/GPU-butterfly/DynamicBatch/
-# make clean
+make clean
 make -j
-# rm -rf /data/dataset/dataset/twitter/partition*
-# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/twitter/ CPU radix edge-centric 25000000 56
+# rm -rf /data/dataset/dataset/MANN-a81/partition*
+# ./butterfly.bin /data/dataset/dataset/MANN-a81/ CPU radix wedge-centric 22077616 56
 
-rm -rf /data/dataset/dataset/twitter/partition*
-/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/twitter/ CPU random edge-centric 25000000 56
+
+rm -rf /data/dataset/dataset/MANN-a81/partition*
+./butterfly.bin /data/dataset/dataset/MANN-a81/ IO radix wedge-centric 22077616 56
+
+rm -rf /data/dataset/dataset/MANN-a81/partition*
+./butterfly.bin /data/dataset/dataset/MANN-a81/ IO random wedge-centric 22077616 56 
+
+rm -rf /data/dataset/dataset/MANN-a81/partition*
+./butterfly.bin /data/dataset/dataset/MANN-a81/ IO range wedge-centric 22077616 56 
+
+# rm -rf /data/dataset/dataset/livejournal/partition*
+# ./butterfly.bin /data/dataset/dataset/livejournal/ CPU radix edge-centric 491990648 56
+
+# rm -rf /data/dataset/dataset/livejournal/partition*
+# ./butterfly.bin /data/dataset/dataset/livejournal/ CPU random edge-centric 491990648 56
+
+# rm -rf /data/dataset/dataset/livejournal/partition*
+# ./butterfly.bin /data/dataset/dataset/livejournal/ CPU range edge-centric 491990648 56
 
 # rm -rf /data/dataset/dataset/twitter/partition*
-# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/twitter/ CPU range edge-centric 25000000 56
+# ./butterfly.bin /data/dataset/dataset/twitter/ CPU radix edge-centric 10770352 56
+
+# rm -rf /data/dataset/dataset/twitter/partition*
+# ./butterfly.bin /data/dataset/dataset/twitter/ CPU random edge-centric 10770352 56
+
+# rm -rf /data/dataset/dataset/twitter/partition*
+# ./butterfly.bin /data/dataset/dataset/twitter/ CPU range edge-centric 10770352 56
+
+
 
 # /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/web-graph/ GPU 100 edge-centric 39073741824 108
 # /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/bi-uk/ GPU 100 edge-centric 39073741824 108

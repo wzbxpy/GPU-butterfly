@@ -11,37 +11,6 @@ enum partitionOption
     randomHash,
     rangeHash
 };
-
-class graph
-{
-public:
-    long long *beginPos = nullptr;
-    int *edgeList = nullptr;
-    vector<long long> *subBeginPosFirst = nullptr;
-    vector<int> *subEdgeListFirst = nullptr;
-    vector<long long> *subBeginPosSecond = nullptr;
-    vector<int> *subEdgeListSecond = nullptr;
-    int uCount, vCount, breakVertex32, breakVertex10, vertexCount;
-    long long edgeCount;
-    int length;
-    int partitionNumSrc;
-    int partitionNumDst;
-    double loadGraph(string folderName);
-    void loadProperties(string folderName);
-    void loadBeginPos(string folderName);
-    void loadSubGraph(string foldername, int id, bool isSrc);
-    void loadWangkaiGraph(string folderName);
-    void partitionGraphSrc(int num);
-    void partitionGraphDst(int num);
-    void partitionAndStore(int num, string path, bool isInMemory, partitionOption option);
-    void partitionAndStoreSrc(int num, string path, vector<int> part, vector<int> index);
-    void partitionAndStoreDst(int num, string path, vector<int> part, vector<int> index);
-    void storeGraph(string path);
-    void loadAllSubgraphs(string path, int partitionNum);
-    graph();
-    ~graph();
-};
-
 enum computationPattern
 {
     wedgecentric,
@@ -74,6 +43,38 @@ struct parameter
         memorySize = 1024 * 1024 * 1024;
         path = "";
     }
+};
+
+class graph
+{
+public:
+    long long *beginPos = nullptr;
+    int *edgeList = nullptr;
+    vector<long long> *subBeginPosFirst = nullptr;
+    vector<int> *subEdgeListFirst = nullptr;
+    vector<long long> *subBeginPosSecond = nullptr;
+    vector<int> *subEdgeListSecond = nullptr;
+    int uCount, vCount, breakVertex32, breakVertex10, vertexCount;
+    long long edgeCount;
+    int length;
+    int partitionNumSrc;
+    int partitionNumDst;
+    double loadGraph(string folderName);
+    void loadProperties(string folderName);
+    void loadBeginPos(string folderName);
+    void loadSubGraph(string foldername, int id, bool isSrc);
+    void loadWangkaiGraph(string folderName);
+    void partitionGraphSrc(int num);
+    void partitionGraphDst(int num);
+    void partitionAndStore(int num, string path, bool isInMemory, partitionOption option, parameter para);
+    void partitionAndStoreSrc(int num, string path, vector<int> part, vector<int> index, long long &maxEdges, long long &minEdges, int &maxVertives);
+    void partitionAndStoreDst(int num, string path, vector<int> part, vector<int> index);
+    void storeGraph(string path);
+    void loadAllSubgraphs(string path, int partitionNum);
+    vector<int> indexToNewId;
+    vector<vector<int>> indexToRawId;
+    graph();
+    ~graph();
 };
 
 bool isSubgraphExist(string path, int partitionNum);

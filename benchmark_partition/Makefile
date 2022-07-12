@@ -2,10 +2,10 @@ exe=butterfly.bin
 N=1
 cucc= "$(shell which nvcc)"
 cc= "$(shell which g++)"
-# commflags=-fcilkplus -ltbb -lcudart -L"$(shell dirname $(cucc))"/../lib64 -g   -O3 -W -Wall -Wno-unused-function -Wno-unused-parameter
-# cuflags= --compiler-options -Wall --gpu-architecture=compute_80 --gpu-code=sm_80 -m64 -c -g -G -O3  # --resource-usage 
-commflags=-fcilkplus -ltbb -lcudart -L"$(shell dirname $(cucc))"/../lib64  -O3 -W -Wall -Wno-unused-function -Wno-unused-parameter
-cuflags= --compiler-options -Wall --gpu-architecture=compute_80 --gpu-code=sm_80 -m64 -c -O3  # --resource-usage 
+commflags=-fcilkplus -ltbb -lcudart -L"$(shell dirname $(cucc))"/../lib64 -g   -O3 -W -Wall -Wno-unused-function -Wno-unused-parameter
+cuflags= --compiler-options -Wall --gpu-architecture=compute_80 --gpu-code=sm_80 -m64 -c -g -G -O3  # --resource-usage 
+# commflags=-fcilkplus -ltbb -lcudart -L"$(shell dirname $(cucc))"/../lib64  -O3 -W -Wall -Wno-unused-function -Wno-unused-parameter
+# cuflags= --compiler-options -Wall --gpu-architecture=compute_80 --gpu-code=sm_80 -m64 -c -O3  # --resource-usage 
 
 .SILENT: cucc
 .SILENT: cc
