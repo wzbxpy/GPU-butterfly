@@ -69,6 +69,6 @@ void getProcessMemory()
         }
     }
     fclose(file);
-    cout << "mem: "
-         << "phyiscal: " << processMem.physicalMem << " virtual: " << processMem.virtualMem << " swap: " << processMem.swapMem << endl;
+    // cout << "mem: "
+    //      << "phyiscal: " << processMem.physicalMem << " virtual: " << processMem.virtualMem << " swap: " << processMem.swapMem << endl;
 }

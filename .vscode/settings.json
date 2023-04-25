@@ -60,6 +60,10 @@
         "stdexcept": "cpp",
         "typeinfo": "cpp"
     },
-    "python.formatting.provider": "autopep8",
-    "C_Cpp.errorSquiggles": "Enabled"
+    "python.formatting.provider": "none",
+    "C_Cpp.errorSquiggles": "Enabled",
+    "python.analysis.typeCheckingMode": "basic",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    }
 }

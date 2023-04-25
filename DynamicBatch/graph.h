@@ -17,6 +17,7 @@ class graph
 public:
     long long *beginPos = nullptr;
     int *edgeList = nullptr;
+    int *deg = nullptr;
     vector<long long> *subBeginPosFirst = nullptr;
     vector<int> *subEdgeListFirst = nullptr;
     vector<long long> *subBeginPosSecond = nullptr;
@@ -38,6 +39,7 @@ public:
     void partitionAndStoreDst(int num, string path, vector<int> part, vector<int> index);
     void storeGraph(string path);
     void loadAllSubgraphs(string path, int partitionNum);
+    int findBreakVertex(int x);
     graph();
     ~graph();
 };
@@ -46,6 +48,31 @@ enum computationPattern
 {
     wedgecentric,
     edgecentric
+};
+
+enum hashRecyPattern
+{
+    adaptiveRecy,
+    scanHashtableRecy,
+    scanWedgeRecy
+};
+
+enum blockExecutionPattern
+{
+    warpForNeighor,
+    threadForNeighor
+};
+
+enum memoryHierarchicalPattern
+{
+    withShared,
+    withoutShared
+};
+
+enum smallWorkloadPattern
+{
+    warpForSmallWorkload,
+    blockForSmallWorkload
 };
 
 // enum algorithmName
@@ -64,6 +91,11 @@ struct parameter
     partitionOption option;
     int processorNum;
     string path;
+    hashRecyPattern hashRecy;
+    blockExecutionPattern blockExecution;
+    memoryHierarchicalPattern memoryHierarchical;
+    smallWorkloadPattern smallWorkload;
+    int subwarpSize;
     parameter()
     {
         partitionNum = 1;
@@ -73,6 +105,11 @@ struct parameter
         option = radixHash;
         memorySize = 1024 * 1024 * 1024;
         path = "";
+        hashRecy = adaptiveRecy;
+        blockExecution = warpForNeighor;
+        memoryHierarchical = withShared;
+        smallWorkload = warpForSmallWorkload;
+        subwarpSize = 32;
     }
 };
 

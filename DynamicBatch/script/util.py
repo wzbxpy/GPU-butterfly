@@ -14,14 +14,33 @@ def average_of_several_run(script: str, repeat: int):
         if len(res[-1]) < 3:
             print("err")
             return [-1, 99999]
-        res1 = res[0].strip().split(" ")[-2:] + \
-            res[-1].strip().split(" ")[-4:]
+        res1 = res[0].strip().split(" ")[-2:] + res[-1].strip().split(" ")[-4:]
         average_res.append(res1)
 
     average_res = np.array(average_res).astype(float).mean(axis=0)
     # print(average_res)
 
     return [average_res[0:2], np.sum(average_res[3:6])]
+
+
+def average_of_several_run_only_kernel(script: str, repeat: int):
+    np.set_printoptions(threshold=np.inf, linewidth=np.inf, suppress=False)
+    average_res = []
+    for re in range(repeat):
+        f = os.popen(script)
+        # print(script)
+        res = f.readlines()
+        # print(res)
+        if len(res[-1]) < 3:
+            print("err")
+            return [-1, 99999]
+        res1 = res[0].strip().split(" ")[-2:] + res[-1].strip().split(" ")[-4:]
+        average_res.append(res1)
+
+    average_res = np.array(average_res).astype(float).mean(axis=0)
+    # print(average_res)
+
+    return average_res
 
 
 def clean_disk():
@@ -31,18 +50,18 @@ def clean_disk():
 
 
 def wedgeOredge(path: str, memory: int) -> str:
-    path = path+"properties.txt"
-    with open(path, 'r') as f:
+    path = path + "properties.txt"
+    with open(path, "r") as f:
         f = f.readlines()
         f = np.array(f[0].strip().split(" ")).astype(float)
-        vertices = f[0]+f[1]
+        vertices = f[0] + f[1]
         edges = f[2]
-        memory = np.sqrt(memory/4)
-        if memory > 2*edges/vertices:
-            return 'edge-centric'
+        memory = np.sqrt(memory / 4)
+        if memory > 2 * edges / vertices:
+            return "edge-centric"
         else:
             return "wedge-centric"
-    return 'error'
+    return "error"
 
 
 if __name__ == "__main__":

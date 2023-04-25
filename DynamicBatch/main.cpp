@@ -132,6 +132,36 @@ int main(int argc, char *argv[])
                     }
                     para.varient = edgecentric;
                 }
+                if (argc > 8)
+                {
+                    string a = argv[8];
+                    if (a == "adaptiveRecy")
+                        para.hashRecy = adaptiveRecy;
+                    if (a == "scanHashtableRecy")
+                        para.hashRecy = scanHashtableRecy;
+                    if (a == "scanWedgeRecy")
+                        para.hashRecy = scanWedgeRecy;
+                }
+                if (argc > 9)
+                {
+                    para.subwarpSize = atoi(argv[9]);
+                }
+                if (argc > 10)
+                {
+                    string a = argv[10];
+                    if (a == "withShared")
+                        para.memoryHierarchical = withShared;
+                    if (a == "withoutShared")
+                        para.memoryHierarchical = withoutShared;
+                }
+                if (argc > 11)
+                {
+                    string a = argv[11];
+                    if (a == "withShared")
+                        para.smallWorkload = warpForSmallWorkload;
+                    if (a == "withoutShared")
+                        para.smallWorkload = blockForSmallWorkload;
+                }
             }
             if (Platform == "IO")
             {

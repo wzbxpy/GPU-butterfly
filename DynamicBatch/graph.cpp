@@ -47,14 +47,19 @@ double graph::loadGraph(string path)
     adjFile.read((char *)edgeList, sizeof(int) * (edgeCount));
     adjFile.close();
     double time = (clock() - startTime) / CLOCKS_PER_SEC;
+
     return time;
-    // int *deg = new int[vertexCount];
-    // int n = vertexCount;
-    // for (int i = 0; i < vertexCount; ++i)
-    //     deg[i] = beginPos[i + 1] - beginPos[i];
-    // breakVertex10 = lower_bound(deg, deg + n, 10, cmp1) - deg;
-    // breakVertex32 = lower_bound(deg, deg + n, 32, cmp1) - deg;
-    // delete (deg);
+}
+
+int graph::findBreakVertex(int x)
+{
+    if (deg == nullptr)
+    {
+        deg = new int[vertexCount];
+        for (int i = 0; i < vertexCount; ++i)
+            deg[i] = beginPos[i + 1] - beginPos[i];
+    }
+    return lower_bound(deg, deg + vertexCount, x, cmp1) - deg;
 }
 
 void graph::loadSubGraph(string path, int id, bool isSrc)
@@ -356,13 +361,13 @@ graph::~graph()
     if (edgeList != nullptr)
         delete (edgeList);
     if (subEdgeListFirst != nullptr)
-        delete[](subEdgeListFirst);
+        delete[] (subEdgeListFirst);
     if (subEdgeListSecond != nullptr)
-        delete[](subEdgeListSecond);
+        delete[] (subEdgeListSecond);
     if (subBeginPosFirst != nullptr)
-        delete[](subBeginPosFirst);
+        delete[] (subBeginPosFirst);
     if (subBeginPosSecond != nullptr)
-        delete[](subBeginPosSecond);
+        delete[] (subBeginPosSecond);
 }
 
 void graph::partitionGraphSrc(int num)

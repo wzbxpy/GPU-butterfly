@@ -15,11 +15,13 @@
 #define inf 0x7fffffff
 #define MAXINT 2147483641
 #define DEBUG
+#define sharedSize 1024 * 8
 #ifdef DEBUG
 #define DBGprint(...) printf(__VA_ARGS__)
 #else
 #define DBGprint(...)
 #endif
+// #define SHAREDTABLE
 
 using namespace std;
 // using namespace cooperative_groups;
@@ -149,84 +151,121 @@ __global__ void initializeBeginPosition_GPUkernel(long long beginPosition[], lon
     }
 }
 
-__global__ void edgeCentric_GPUkernel(GPUgraph G_src, GPUgraph G_dst, unsigned long long *globalCount, int *hashTable, int partitionNum, int vertexOffsets, int *nextVertex, long long maxVertexCount, long long beginPosition[], long long endPosition[], int dstOffsets)
+__global__ void edgeCentric_GPUkernel(GPUgraph G_src, GPUgraph G_dst, unsigned long long *globalCount, int *hashTable, int partitionNum, int vertexOffsets, int *nextVertex, long long maxVertexCount, long long beginPosition[], long long endPosition[], int dstOffsets, int subwarpSize, int startVertex, int endVertex)
 {
     __shared__ unsigned long long sharedCount;
     __shared__ int nextVertexshared;
     hashTable = hashTable + maxVertexCount * blockIdx.x;
-
     if (threadIdx.x == 0)
         sharedCount = 0;
     unsigned long long count = 0;
+    int degreeBound = (long long)G_dst.vertexCount * G_dst.vertexCount / G_dst.edgeCount;
 
+#ifdef SHAREDTABLE
+    __shared__ int sharedHashTable[sharedSize];
+    for (int i = threadIdx.x; i < sharedSize; i += blockDim.x)
+    {
+        sharedHashTable[i] = 0;
+    }
+    for (int i = threadIdx.x + sharedSize; i < maxVertexCount; i += blockDim.x)
+    {
+        hashTable[i] = 0;
+    }
+#else
     for (int i = threadIdx.x; i < maxVertexCount; i += blockDim.x)
     {
         hashTable[i] = 0;
     }
+#endif
+
     __syncthreads();
 
-    for (int vertex = blockIdx.x * chunckSize + dstOffsets / partitionNum; vertex < G_src.vertexCount;)
+    // int subwarpSize = 2;
+    int subwarpNum = blockDim.x / subwarpSize;
+    for (int vertex = blockIdx.x * chunckSize + startVertex; vertex < endVertex;)
     {
         int vertexDegree = G_src.beginPos[vertex + 1] - G_src.beginPos[vertex];
-        if (vertexDegree <= 32)
-            break;
-        if (vertexDegree > 32)
-        // break;
+        // if (vertexDegree * subwarpSize < 1024)
+        // {
+        //     subwarpSize *= 2;
+        //     subwarpNum /= 2;
+        // }
+        // put the two hop neighbor of vertex into hash map
+        for (auto oneHopNeighborID = G_src.beginPos[vertex] + threadIdx.x / subwarpSize; oneHopNeighborID < G_src.beginPos[vertex + 1]; oneHopNeighborID += subwarpNum)
         {
-            // put the two hop neighbor of vertex into hash map
-            for (auto oneHopNeighborID = G_src.beginPos[vertex] + threadIdx.x / 32; oneHopNeighborID < G_src.beginPos[vertex + 1]; oneHopNeighborID += 32)
+            int oneHopNeighbor = G_src.edgeList[oneHopNeighborID];
+            if (oneHopNeighbor < dstOffsets)
+                continue;
+            int bound = vertex * partitionNum + vertexOffsets < oneHopNeighbor ? vertex * partitionNum + vertexOffsets : oneHopNeighbor;
+            for (auto twoHopNeighborID = beginPosition[oneHopNeighbor] + threadIdx.x % subwarpSize; twoHopNeighborID < endPosition[oneHopNeighbor]; twoHopNeighborID += subwarpSize)
+            {
+                int twoHopNeighbor = G_dst.edgeList[twoHopNeighborID];
+                if (twoHopNeighbor >= bound)
+                    break;
+                int index = (twoHopNeighbor - dstOffsets) / partitionNum;
+#ifdef SHAREDTABLE
+                if (index < sharedSize)
+                    count += atomicAdd(&sharedHashTable[index], 1);
+                else
+#endif
+                    count += atomicAdd(&hashTable[index], 1);
+
+                // hashTable[(twoHopNeighbor - dstOffsets) / partitionNum]++;
+                // count++;
+            }
+        }
+        __syncthreads();
+
+        // reset the hash map
+        // if (0)
+        if (vertexDegree > degreeBound) // choose the lower costs method
+        {
+// hashTableShared[threadIdx.x] = 0;
+#ifdef SHAREDTABLE
+            for (int i = threadIdx.x; i < sharedSize; i += blockDim.x)
+            {
+                sharedHashTable[i] = 0;
+            }
+            for (int i = threadIdx.x + sharedSize; i < vertex; i += blockDim.x)
+            {
+                hashTable[i] = 0;
+            }
+#else
+            for (int i = threadIdx.x; i < vertex; i += blockDim.x)
+            {
+                hashTable[i] = 0;
+            }
+#endif
+        }
+        else
+        {
+            for (auto oneHopNeighborID = G_src.beginPos[vertex] + threadIdx.x / subwarpSize; oneHopNeighborID < G_src.beginPos[vertex + 1]; oneHopNeighborID += subwarpNum)
             {
                 int oneHopNeighbor = G_src.edgeList[oneHopNeighborID];
                 if (oneHopNeighbor < dstOffsets)
                     continue;
                 int bound = vertex * partitionNum + vertexOffsets < oneHopNeighbor ? vertex * partitionNum + vertexOffsets : oneHopNeighbor;
-                for (auto twoHopNeighborID = beginPosition[oneHopNeighbor] + threadIdx.x % 32; twoHopNeighborID < endPosition[oneHopNeighbor]; twoHopNeighborID += 32)
+                for (auto twoHopNeighborID = beginPosition[oneHopNeighbor] + threadIdx.x % subwarpSize; twoHopNeighborID < endPosition[oneHopNeighbor]; twoHopNeighborID += subwarpSize)
                 {
                     int twoHopNeighbor = G_dst.edgeList[twoHopNeighborID];
                     if (twoHopNeighbor >= bound)
                         break;
-                    count += atomicAdd(&hashTable[(twoHopNeighbor - dstOffsets) / partitionNum], 1);
-
-                    // hashTable[(twoHopNeighbor - dstOffsets) / partitionNum]++;
-                    // count++;
+                    int index = (twoHopNeighbor - dstOffsets) / partitionNum;
+#ifdef SHAREDTABLE
+                    if (index < sharedSize)
+                        sharedHashTable[index] = 0;
+                    else
+#endif
+                        hashTable[index] = 0;
                 }
             }
-            __syncthreads();
-
-            // reset the hash map
-            // if (0)
-            if (G_dst.edgeCount / G_dst.vertexCount > G_dst.vertexCount / vertexDegree) // choose the lower costs method
-            {
-                // hashTableShared[threadIdx.x] = 0;
-                for (int i = threadIdx.x; i < vertex; i += blockDim.x)
-                {
-                    hashTable[i] = 0;
-                }
-            }
-            else
-            {
-                for (auto oneHopNeighborID = G_src.beginPos[vertex] + threadIdx.x / 32; oneHopNeighborID < G_src.beginPos[vertex + 1]; oneHopNeighborID += 32)
-                {
-                    int oneHopNeighbor = G_src.edgeList[oneHopNeighborID];
-                    if (oneHopNeighbor < dstOffsets)
-                        continue;
-                    int bound = vertex * partitionNum + vertexOffsets < oneHopNeighbor ? vertex * partitionNum + vertexOffsets : oneHopNeighbor;
-                    for (auto twoHopNeighborID = beginPosition[oneHopNeighbor] + threadIdx.x % 32; twoHopNeighborID < endPosition[oneHopNeighbor]; twoHopNeighborID += 32)
-                    {
-                        int twoHopNeighbor = G_dst.edgeList[twoHopNeighborID];
-                        if (twoHopNeighbor >= bound)
-                            break;
-                        hashTable[(twoHopNeighbor - dstOffsets) / partitionNum] = 0;
-                    }
-                }
-            }
-            // if (count > 0)
-            //     printf("%d %lld \n", vertex, count);
-            // break;
         }
+        // if (count > 0)
+        //     printf("%d %lld \n", vertex, count);
+        // break;
 
         __syncthreads();
-        loadNextVertex(vertex, nextVertex, nextVertexshared, threadIdx.x == 0, dstOffsets / partitionNum);
+        loadNextVertex(vertex, nextVertex, nextVertexshared, threadIdx.x == 0, startVertex);
         // vertex += gridDim.x;
     }
 
@@ -243,7 +282,7 @@ struct marker
     int localNow;
     int len;
 };
-__global__ void mergeBased(GPUgraph G_src, GPUgraph G_dst, unsigned long long *globalCount, int *hashTable, int partitionNum, int vertexOffsets, int *nextVertex, long long maxVertexCount, long long beginPosition[], long long endPosition[], int dstOffsets)
+__global__ void mergeBased(GPUgraph G_src, GPUgraph G_dst, unsigned long long *globalCount, int *hashTable, int partitionNum, int vertexOffsets, int *nextVertex, long long maxVertexCount, long long beginPosition[], long long endPosition[], int startVertex, int endVertex)
 {
     __shared__ unsigned long long sharedCount;
     __shared__ int nextVertexshared[32];
@@ -255,28 +294,46 @@ __global__ void mergeBased(GPUgraph G_src, GPUgraph G_dst, unsigned long long *g
     struct marker h;
     int bound;
 
-    // first creat the marker
-    for (int vertex = (blockIdx.x * 32 + warpId) * chunckSize + dstOffsets / partitionNum; vertex < G_src.vertexCount;)
+    for (int vertex = (blockIdx.x * 32 + warpId) * chunckSize + startVertex; vertex < G_src.vertexCount;)
     // if (warpId != 0 || blockIdx.x != 0)
     //     return;
     // for (int vertex = 4286699; vertex <= 4286699;)
-    {
+    { // first creat the marker
         int vertexDegree = G_src.beginPos[vertex + 1] - G_src.beginPos[vertex];
-        if (vertexDegree < 2)
-            break;
-        if (vertexDegree <= 32)
+        h.element = MAXINT;
+        for (int oneHopNeighborID = G_src.beginPos[vertex] + threadId; oneHopNeighborID < G_src.beginPos[vertex + 1]; oneHopNeighborID += 32)
         {
-            h.element = MAXINT;
-            for (int oneHopNeighborID = G_src.beginPos[vertex] + threadId; oneHopNeighborID < G_src.beginPos[vertex + 1]; oneHopNeighborID += 32)
-            {
-                int oneHopNeighbor = G_src.edgeList[oneHopNeighborID];
-                // get the first neighbor in each oneHopNeighbor's neighbor list
-                bound = vertex * partitionNum + vertexOffsets < oneHopNeighbor ? vertex * partitionNum + vertexOffsets : oneHopNeighbor;
+            int oneHopNeighbor = G_src.edgeList[oneHopNeighborID];
+            // get the first neighbor in each oneHopNeighbor's neighbor list
+            bound = vertex * partitionNum + vertexOffsets < oneHopNeighbor ? vertex * partitionNum + vertexOffsets : oneHopNeighbor;
 
-                int start = G_dst.beginPos[oneHopNeighbor];
-                int end = G_dst.beginPos[oneHopNeighbor + 1];
-                h.globalNow = G_dst.edgeList + start;
-                h.len = end - start;
+            int start = G_dst.beginPos[oneHopNeighbor];
+            int end = G_dst.beginPos[oneHopNeighbor + 1];
+            h.globalNow = G_dst.edgeList + start;
+            h.len = end - start;
+            if (h.len > 0)
+            {
+                int element = *(h.globalNow);
+                if (element < bound)
+                    h.element = element;
+                else
+                    h.len = -1;
+                h.len--;
+                h.globalNow++;
+            }
+        }
+        // int previousElement = -1, cc = 1;
+        // __syncwarp();
+        // second pop the top element in marker and add new element from its corresponding neighbor list
+        for (;;)
+        {
+            int element = __reduce_min_sync(FULL_MASK, h.element);
+            if (element == MAXINT)
+                break;
+            int matched = element == h.element;
+            if (matched)
+            {
+                h.element = MAXINT;
                 if (h.len > 0)
                 {
                     int element = *(h.globalNow);
@@ -288,48 +345,25 @@ __global__ void mergeBased(GPUgraph G_src, GPUgraph G_dst, unsigned long long *g
                     h.globalNow++;
                 }
             }
-            // int previousElement = -1, cc = 1;
-            // __syncwarp();
-            // second pop the top element in marker and add new element from its corresponding neighbor list
-            for (;;)
-            {
-                int element = __reduce_min_sync(FULL_MASK, h.element);
-                if (element == MAXINT)
-                    break;
-                int matched = element == h.element;
-                if (matched)
-                {
-                    h.element = MAXINT;
-                    if (h.len > 0)
-                    {
-                        int element = *(h.globalNow);
-                        if (element < bound)
-                            h.element = element;
-                        else
-                            h.len = -1;
-                        h.len--;
-                        h.globalNow++;
-                    }
-                }
-                matched = __reduce_add_sync(FULL_MASK, matched);
-                if (threadId == 0)
-                    count += matched * (matched - 1) / 2;
-                // if (threadId == 0 && blockIdx.x == 36)
-                //     printf("%d %d %d\n", matched, element, vertex);
-                // printf("%d %d\n", threadIdx.x, h.element);
-            }
-            // if (threadId == 0)
-            // {
-            //     int oneHopNeighbor = G_src.edgeList[G_src.beginPos[vertex]];
-            //     int x = G_dst.edgeList[G_dst.beginPos[oneHopNeighbor]];
-            //     int y = G_dst.edgeList[G_dst.beginPos[oneHopNeighbor + 1]];
-            //     if (x == y)
-            //         count++;
-            // }
-            // if (threadId == 0 && count > 0)
-            //     printf("%d %lld\n", vertex, count);
-            // break;
+            matched = __reduce_add_sync(FULL_MASK, matched);
+            if (threadId == 0)
+                count += matched * (matched - 1) / 2;
+            // if (threadId == 0 && blockIdx.x == 36)
+            //     printf("%d %d %d\n", matched, element, vertex);
+            // printf("%d %d\n", threadIdx.x, h.element);
         }
+        // if (threadId == 0)
+        // {
+        //     int oneHopNeighbor = G_src.edgeList[G_src.beginPos[vertex]];
+        //     int x = G_dst.edgeList[G_dst.beginPos[oneHopNeighbor]];
+        //     int y = G_dst.edgeList[G_dst.beginPos[oneHopNeighbor + 1]];
+        //     if (x == y)
+        //         count++;
+        // }
+        // if (threadId == 0 && count > 0)
+        //     printf("%d %lld\n", vertex, count);
+        // break;
+
         // __syncthreads();
         // loadNextVertex(vertex, nextVertex, nextVertexshared[warpId], threadId == 0);
         vertex += 32 * gridDim.x;
@@ -363,7 +397,7 @@ __global__ void hashBased1HopPerThread(GPUgraph G_src, GPUgraph G_dst, unsigned 
     for (int vertex = blockIdx.x * chunckSize + dstOffsets / partitionNum; vertex < G_src.vertexCount;)
     {
         int vertexDegree = G_src.beginPos[vertex + 1] - G_src.beginPos[vertex];
-        if (vertexDegree < 2)
+        if (vertexDegree < 1024)
             break;
         // put the two hop neighbor of vertex into hash map
         for (auto oneHopNeighborID = G_src.beginPos[vertex] + threadIdx.x; oneHopNeighborID < G_src.beginPos[vertex + 1]; oneHopNeighborID += blockDim.x)
@@ -429,7 +463,8 @@ __global__ void hashBased1HopPerThread(GPUgraph G_src, GPUgraph G_dst, unsigned 
 
 int BC_edge_centric(graph *G, parameter para)
 {
-    double startTime, transferTime = 0, computeTime = 0, initializeTime = 0;
+    double startTime, transferTime = 0, initializeTime = 0;
+    double computeTime_block_largeWorkload = 0, computeTime_block_smallWorkload = 0, computeTime_warp_smallWorkload = 0;
 
     int numThreads = 1024;
     int numBlocks = para.processorNum;
@@ -443,7 +478,6 @@ int BC_edge_centric(graph *G, parameter para)
     HRR(cudaMallocManaged(&nextVertex, sizeof(int)));
     int *hashTable;
     long long maxVertexCountInBatch = ceil(G->vertexCount / (double)para.batchNum / (double)partitionNum);
-    cout << G->vertexCount << endl;
     HRR(cudaMalloc(&hashTable, maxVertexCountInBatch * numBlocks * sizeof(int)));
     // GPUgraph G_src(G->subBeginPosFirst[0].size() - 1, G->subEdgeListFirst[0].size());
     // GPUgraph G_dst(G->subBeginPosSecond[0].size() - 1, G->subEdgeListSecond[0].size());
@@ -451,6 +485,9 @@ int BC_edge_centric(graph *G, parameter para)
     GPUgraph G_dst(subgraphFold(para.path, partitionNum, 0, false));
     graph *Gtmp = new graph;
     Gtmp->loadGraph(subgraphFold(para.path, partitionNum, 0, false));
+    Gtmp->loadGraph(subgraphFold(para.path, partitionNum, 0, true));
+    int vertex32 = Gtmp->findBreakVertex(32);
+    int vertex1 = Gtmp->findBreakVertex(1);
 
     long long *D_Position;
     HRR(cudaMalloc(&D_Position, sizeof(long long) * G->vertexCount * 2));
@@ -475,20 +512,34 @@ int BC_edge_centric(graph *G, parameter para)
                 initializeTime += getDeltaTime(startTime);
                 *nextVertex = numBlocks * chunckSize + maxVertexCountInBatch * b;
                 startTime = wtime();
-                hashBased1HopPerThread<<<numBlocks, numThreads>>>(G_src, G_dst, globalCount, hashTable, partitionNum, i, nextVertex, maxVertexCountInBatch, &D_Position[(b % 2) * G->vertexCount], &D_Position[((b + 1) % 2) * G->vertexCount], dstOffsets);
+                // int subwarpSize = 32;
+                // if (para.blockExecution == threadForNeighor)
+                //     subwarpSize = 1;
+                //     hashBased1HopPerThread<<<numBlocks, numThreads>>>(G_src, G_dst, globalCount, hashTable, partitionNum, i, nextVertex, maxVertexCountInBatch, &D_Position[(b % 2) * G->vertexCount], &D_Position[((b + 1) % 2) * G->vertexCount], dstOffsets);
+                // else
+                edgeCentric_GPUkernel<<<numBlocks, numThreads>>>(G_src, G_dst, globalCount, hashTable, partitionNum, i, nextVertex, maxVertexCountInBatch, &D_Position[(b % 2) * G->vertexCount], &D_Position[((b + 1) % 2) * G->vertexCount], dstOffsets, para.subwarpSize, maxVertexCountInBatch * b, vertex32);
                 HRR(cudaDeviceSynchronize());
-                computeTime += getDeltaTime(startTime);
+                computeTime_block_largeWorkload += getDeltaTime(startTime);
+                int startVertex = max(int(maxVertexCountInBatch * b), vertex32);
+                *nextVertex = numBlocks * chunckSize + startVertex;
+                startTime = wtime();
+                edgeCentric_GPUkernel<<<numBlocks, numThreads>>>(G_src, G_dst, globalCount, hashTable, partitionNum, i, nextVertex, maxVertexCountInBatch, &D_Position[(b % 2) * G->vertexCount], &D_Position[((b + 1) % 2) * G->vertexCount], dstOffsets, para.subwarpSize, startVertex, vertex1);
+                HRR(cudaDeviceSynchronize());
+                computeTime_block_smallWorkload += getDeltaTime(startTime);
                 // cout << i << " " << j << " " << b << " " << G->vertexCount << endl;
                 // for (int xxx = G->vertexCount - 5; xxx < G->vertexCount; xxx++)
                 //     cout << D_Position[(b % 2) * G->vertexCount + xxx] << ' ' << D_Position[((b + 1) % 2) * G->vertexCount + xxx] << endl;
                 // cout << G->vertexCount << endl;
             }
-            // mergeBased<<<numBlocks, numThreads>>>(G_src, G_dst, globalCount, hashTable, partitionNum, i, nextVertex, maxVertexCountInBatch, &D_Position[(0) * G->vertexCount], &D_Position[(1) * G->vertexCount], 0);
-            // HRR(cudaDeviceSynchronize());
+
+            startTime = wtime();
+            mergeBased<<<numBlocks, numThreads>>>(G_src, G_dst, globalCount, hashTable, partitionNum, i, nextVertex, maxVertexCountInBatch, &D_Position[(0) * G->vertexCount], &D_Position[(1) * G->vertexCount], vertex32, vertex1);
+            HRR(cudaDeviceSynchronize());
+            computeTime_warp_smallWorkload += getDeltaTime(startTime);
         }
     }
     cout << *globalCount << ' ';
-    cout << initializeTime << " " << computeTime << " " << transferTime << endl;
+    cout << initializeTime << " " << computeTime_block_largeWorkload << " " << computeTime_block_smallWorkload << " " << computeTime_warp_smallWorkload << " " << transferTime << endl;
 
     // cout << initializeTime << ' ' << computeTime * partitionNum * partitionNum << " " << transferTime * partitionNum * partitionNum << endl;
     delete Gtmp;
@@ -645,7 +696,7 @@ int BC_wedge_centric(graph *G, parameter para)
 
 int BC_GPU(graph *G, parameter para)
 {
-    cudaSetDevice(1);
+    cudaSetDevice(0);
     // int a, b;
     // HRR(cudaOccupancyMaxPotentialBlockSize(&a, &b, edgeCentric_GPUkernel));
     // cout << a << " " << b << endl;
