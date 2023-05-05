@@ -21,7 +21,7 @@
 #else
 #define DBGprint(...)
 #endif
-// #define SHAREDTABLE
+#define SHAREDTABLE
 
 using namespace std;
 // using namespace cooperative_groups;
@@ -151,18 +151,33 @@ __global__ void initializeBeginPosition_GPUkernel(long long beginPosition[], lon
     }
 }
 
-__global__ void edgeCentric_GPUkernel(GPUgraph G_src, GPUgraph G_dst, unsigned long long *globalCount, int *hashTable, int partitionNum, int vertexOffsets, int *nextVertex, long long maxVertexCount, long long beginPosition[], long long endPosition[], int dstOffsets, int subwarpSize, int startVertex, int endVertex)
+__global__ void edgeCentric_GPUkernel(GPUgraph G_src,
+                                      GPUgraph G_dst,
+                                      unsigned long long *globalCount,
+                                      int *hashTable,
+                                      int partitionNum,
+                                      int vertexOffsets,
+                                      int *nextVertex,
+                                      long long maxVertexCount,
+                                      long long beginPosition[],
+                                      long long endPosition[],
+                                      int dstOffsets,
+                                      int subwarpSize,
+                                      int degreeBoundForClearHashtable,
+                                      int startVertex,
+                                      int endVertex)
 {
     __shared__ unsigned long long sharedCount;
     __shared__ int nextVertexshared;
+    // __shared__ unsigned long long nextOneHopNeighborID;
     hashTable = hashTable + maxVertexCount * blockIdx.x;
     if (threadIdx.x == 0)
         sharedCount = 0;
     unsigned long long count = 0;
-    int degreeBound = (long long)G_dst.vertexCount * G_dst.vertexCount / G_dst.edgeCount;
 
+    // Initialize Hashtable
 #ifdef SHAREDTABLE
-    __shared__ int sharedHashTable[sharedSize];
+    __shared__ int sharedHashTable[sharedSize + 1];
     for (int i = threadIdx.x; i < sharedSize; i += blockDim.x)
     {
         sharedHashTable[i] = 0;
@@ -191,7 +206,11 @@ __global__ void edgeCentric_GPUkernel(GPUgraph G_src, GPUgraph G_dst, unsigned l
         //     subwarpNum /= 2;
         // }
         // put the two hop neighbor of vertex into hash map
-        for (auto oneHopNeighborID = G_src.beginPos[vertex] + threadIdx.x / subwarpSize; oneHopNeighborID < G_src.beginPos[vertex + 1]; oneHopNeighborID += subwarpNum)
+        // if (threadIdx.x == 0)
+        //     nextOneHopNeighborID = G_src.beginPos[vertex] + subwarpNum;
+        // __syncthreads();
+        for (auto oneHopNeighborID = G_src.beginPos[vertex] + threadIdx.x / subwarpSize; oneHopNeighborID < G_src.beginPos[vertex + 1];)
+        // for (auto oneHopNeighborID = G_src.beginPos[vertex] + threadIdx.x / subwarpSize; oneHopNeighborID < G_src.beginPos[vertex + 1]; oneHopNeighborID += subwarpNum)
         {
             int oneHopNeighbor = G_src.edgeList[oneHopNeighborID];
             if (oneHopNeighbor < dstOffsets)
@@ -213,12 +232,22 @@ __global__ void edgeCentric_GPUkernel(GPUgraph G_src, GPUgraph G_dst, unsigned l
                 // hashTable[(twoHopNeighbor - dstOffsets) / partitionNum]++;
                 // count++;
             }
+            oneHopNeighborID += subwarpNum;
+            // if (oneHopNeighborID + (32 - threadIdx.x % 32) / subwarpSize >= G_src.beginPos[vertex + 1])
+            //     break;
+            // if (threadIdx.x % 32 == 0)
+            // {
+            //     oneHopNeighborID = atomicAdd(&nextOneHopNeighborID, (unsigned long long)32 / subwarpSize);
+            // }
+            // oneHopNeighborID = __shfl_sync(FULL_MASK, oneHopNeighborID, 0);
+            // oneHopNeighborID += (threadIdx.x % 32) / subwarpSize;
+            // printf("threadid %d onehopneighbor %d\n", threadIdx.x, oneHopNeighbor);
         }
         __syncthreads();
 
         // reset the hash map
         // if (0)
-        if (vertexDegree > degreeBound) // choose the lower costs method
+        if (vertexDegree > degreeBoundForClearHashtable) // choose the lower costs method
         {
 // hashTableShared[threadIdx.x] = 0;
 #ifdef SHAREDTABLE
@@ -469,6 +498,7 @@ int BC_edge_centric(graph *G, parameter para)
     int numThreads = 1024;
     int numBlocks = para.processorNum;
     int partitionNum = para.partitionNum;
+    int degreeBoundForClearHashtable;
     // numBlocks = 1;
 
     unsigned long long *globalCount;
@@ -488,6 +518,14 @@ int BC_edge_centric(graph *G, parameter para)
     Gtmp->loadGraph(subgraphFold(para.path, partitionNum, 0, true));
     int vertex32 = Gtmp->findBreakVertex(32);
     int vertex1 = Gtmp->findBreakVertex(1);
+
+    if (para.hashRecy == adaptiveRecy)
+        degreeBoundForClearHashtable = (long long)G->vertexCount * G->vertexCount / G->edgeCount;
+    if (para.hashRecy == scanWedgeRecy)
+        degreeBoundForClearHashtable = G->vertexCount;
+    if (para.hashRecy == scanHashtableRecy)
+        degreeBoundForClearHashtable = 0;
+    // cout << degreeBoundForClearHashtable << " " << Gtmp->findBreakVertex(degreeBoundForClearHashtable) << endl;
 
     long long *D_Position;
     HRR(cudaMalloc(&D_Position, sizeof(long long) * G->vertexCount * 2));
@@ -517,15 +555,32 @@ int BC_edge_centric(graph *G, parameter para)
                 //     subwarpSize = 1;
                 //     hashBased1HopPerThread<<<numBlocks, numThreads>>>(G_src, G_dst, globalCount, hashTable, partitionNum, i, nextVertex, maxVertexCountInBatch, &D_Position[(b % 2) * G->vertexCount], &D_Position[((b + 1) % 2) * G->vertexCount], dstOffsets);
                 // else
-                edgeCentric_GPUkernel<<<numBlocks, numThreads>>>(G_src, G_dst, globalCount, hashTable, partitionNum, i, nextVertex, maxVertexCountInBatch, &D_Position[(b % 2) * G->vertexCount], &D_Position[((b + 1) % 2) * G->vertexCount], dstOffsets, para.subwarpSize, maxVertexCountInBatch * b, vertex32);
+                edgeCentric_GPUkernel<<<numBlocks, numThreads>>>(G_src,
+                                                                 G_dst,
+                                                                 globalCount,
+                                                                 hashTable,
+                                                                 partitionNum,
+                                                                 i,
+                                                                 nextVertex,
+                                                                 maxVertexCountInBatch,
+                                                                 &D_Position[(b % 2) * G->vertexCount],
+                                                                 &D_Position[((b + 1) % 2) * G->vertexCount],
+                                                                 dstOffsets,
+                                                                 para.subwarpSize,
+                                                                 degreeBoundForClearHashtable,
+                                                                 maxVertexCountInBatch * b,
+                                                                 vertex32);
                 HRR(cudaDeviceSynchronize());
                 computeTime_block_largeWorkload += getDeltaTime(startTime);
                 int startVertex = max(int(maxVertexCountInBatch * b), vertex32);
                 *nextVertex = numBlocks * chunckSize + startVertex;
-                startTime = wtime();
-                edgeCentric_GPUkernel<<<numBlocks, numThreads>>>(G_src, G_dst, globalCount, hashTable, partitionNum, i, nextVertex, maxVertexCountInBatch, &D_Position[(b % 2) * G->vertexCount], &D_Position[((b + 1) % 2) * G->vertexCount], dstOffsets, para.subwarpSize, startVertex, vertex1);
-                HRR(cudaDeviceSynchronize());
-                computeTime_block_smallWorkload += getDeltaTime(startTime);
+                if (para.smallWorkload == blockForSmallWorkload)
+                {
+                    startTime = wtime();
+                    edgeCentric_GPUkernel<<<numBlocks, numThreads>>>(G_src, G_dst, globalCount, hashTable, partitionNum, i, nextVertex, maxVertexCountInBatch, &D_Position[(b % 2) * G->vertexCount], &D_Position[((b + 1) % 2) * G->vertexCount], dstOffsets, para.subwarpSize, degreeBoundForClearHashtable, startVertex, vertex1);
+                    HRR(cudaDeviceSynchronize());
+                    computeTime_block_smallWorkload += getDeltaTime(startTime);
+                }
                 // cout << i << " " << j << " " << b << " " << G->vertexCount << endl;
                 // for (int xxx = G->vertexCount - 5; xxx < G->vertexCount; xxx++)
                 //     cout << D_Position[(b % 2) * G->vertexCount + xxx] << ' ' << D_Position[((b + 1) % 2) * G->vertexCount + xxx] << endl;
