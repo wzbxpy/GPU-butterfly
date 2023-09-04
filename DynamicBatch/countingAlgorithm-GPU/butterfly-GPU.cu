@@ -225,10 +225,12 @@ __global__ void edgeCentric_GPUkernel(GPUgraph G_src,
                 int index = (twoHopNeighbor - dstOffsets) / partitionNum;
 #ifdef SHAREDTABLE
                 if (index < sharedSize)
-                    count += atomicAdd(&sharedHashTable[index], 1);
+                    count = count;
+                // count += atomicAdd(&sharedHashTable[index], 1);
                 else
 #endif
-                    count += atomicAdd(&hashTable[index], 1);
+                    count++;
+                // count += atomicAdd(&hashTable[index], 1);
 
                 // hashTable[(twoHopNeighbor - dstOffsets) / partitionNum]++;
                 // count++;
@@ -538,17 +540,17 @@ int BC_edge_centric(graph *G, parameter para)
                 // cout << G->vertexCount << endl;
             }
 
-            startTime = wtime();
-            mergeBased<<<numBlocks, numThreads>>>(G_src,
-                                                  G_dst,
-                                                  globalCount,
-                                                  partitionNum,
-                                                  i,
-                                                  nextVertex,
-                                                  vertex32,
-                                                  vertex1);
-            HRR(cudaDeviceSynchronize());
-            computeTime_warp_smallWorkload += getDeltaTime(startTime);
+            // startTime = wtime();
+            // mergeBased<<<numBlocks, numThreads>>>(G_src,
+            //                                       G_dst,
+            //                                       globalCount,
+            //                                       partitionNum,
+            //                                       i,
+            //                                       nextVertex,
+            //                                       vertex32,
+            //                                       vertex1);
+            // HRR(cudaDeviceSynchronize());
+            // computeTime_warp_smallWorkload += getDeltaTime(startTime);
             if (para.smallWorkload == blockForSmallWorkload)
             {
                 for (int degreeRange = 0; degreeRange < markerNum; degreeRange++)

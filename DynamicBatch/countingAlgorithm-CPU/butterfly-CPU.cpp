@@ -4,7 +4,9 @@
 #include <cmath>
 #include <atomic>
 #include <thread>
-#include <memory.h>
+#include <memory>
+#include <mutex>
+#include <cstring>
 #include "butterfly-CPU.h"
 #include "../wtime.h"
 #include "../graph.h"
