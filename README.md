@@ -9,6 +9,24 @@ The code of IOBufs is at DynamicBatch fold.
 CUDA Toolkit 11.6;
 g++ 7.5.0;
 
+## Usage
+compile the code
+    `$ make -j`
+run the code 
+    `$ ./butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 12000000000 108 -1 adaptiveRecy 32 blockForSmallWorkload`
+
+Input parameter is 
+1. input graph folder
+2. platform: CPU or GPU
+3. partition strategy: radix, random or range
+4. variant: edge-centric or wedge-centric
+5. memory size 
+6. thread num (CPU)/ block num(GPU)
+7. batch num (automatically generated when setting -1)
+8. Hashtable recycle option for GPU: adaptiveRecy, scanHashtableRecy or scanWedgeRecy
+9. subwarp size for block-level parallelism in GPU
+10. benchmark warp and block for small workload when setting blockForSmallWorkload
+
 <!-- ## Prerpocess
 In Preprocessing step, use 
 

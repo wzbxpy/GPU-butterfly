@@ -1,14 +1,29 @@
 cd /home/wzb/bc/GPU-butterfly/DynamicBatch/
 # make clean
 make -j
+
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/delicious/ GPU 100 edge-centric 54564104000 108 1 adaptiveRecy 16
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/delicious/ GPU 100 edge-centric 54564104000 108 2
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/delicious/ GPU 100 edge-centric 2182564160 108 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/orkut/ GPU 100 edge-centric 135420616400 108 1
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/orkut/ GPU 100 edge-centric 135420616400 108 4
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/orkut/ GPU 100 edge-centric 5416824656 108
 # rm -rf /data/dataset/dataset/twitter/partition*
 
 # /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/web-graph/ GPU 100 edge-centric 39073741824 108
 # /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/bi-uk/ GPU 100 edge-centric 39073741824 108
 # /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 120000000 108
-/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 1200000000 108 
-/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 12000000000 108 10
-/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 12000000000 108 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 1200000000 108 
+# /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 12000000000 108 10
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 12000000000 108 -1 adaptiveRecy 32 blockForSmallWorkload
+
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 12000000000 108 -1 adaptiveRecy 32 blockForSmallWorkload
+
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 1200000000 108 -1 adaptiveRecy 32 
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 1200000000 108 -1 adaptiveRecy 32 blockForSmallWorkload
+
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 120000000 108 -1 adaptiveRecy 32 
+/home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ GPU 100 edge-centric 120000000 108 -1 adaptiveRecy 32 blockForSmallWorkload
 # /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /data/dataset/dataset/livejournal/ CPU 100 edge-centric 12000000000 56
 
 # /home/wzb/bc/GPU-butterfly/DynamicBatch/butterfly.bin /home/wzb/bc/dataset/twitter/ sharedHashtable 100 edge-centric 1073741824 56

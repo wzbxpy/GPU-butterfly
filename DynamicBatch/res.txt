@@ -1,0 +1,4 @@
+"/usr/local/cuda-11.6/bin/nvcc" -c --compiler-options -Wall --gpu-architecture=compute_80 --gpu-code=sm_80 -m64 -c -O3   countingAlgorithm-GPU/butterfly-GPU.cu  -o countingAlgorithm-GPU/butterfly-GPU.o 
+"/usr/bin/g++" countingAlgorithm-GPU/butterfly-GPU.o countingAlgorithm-CPU/butterfly-CPU.o wtime.o graph.o main.o  -fcilkplus -ltbb -lcudart -L"/usr/local/cuda-11.6/bin"/../lib64  -O3 -W -Wall -Wno-unused-function -Wno-unused-parameter -o butterfly.bin
+prperties 34611302 203597914 ec partition num: 1 1
+56892252403 0.00103807 0.536152 0 0.274811 0.745337

@@ -149,17 +149,9 @@ int main(int argc, char *argv[])
                 if (argc > 10)
                 {
                     string a = argv[10];
-                    if (a == "withShared")
-                        para.memoryHierarchical = withShared;
-                    if (a == "withoutShared")
-                        para.memoryHierarchical = withoutShared;
-                }
-                if (argc > 11)
-                {
-                    string a = argv[11];
-                    if (a == "withShared")
+                    if (a == "warpForSmallWorkload")
                         para.smallWorkload = warpForSmallWorkload;
-                    if (a == "withoutShared")
+                    if (a == "blockForSmallWorkload")
                         para.smallWorkload = blockForSmallWorkload;
                 }
             }
